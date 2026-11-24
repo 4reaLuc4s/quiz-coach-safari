@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>练习页 · Quiz Coach 预览</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 28px 20px 120px;
+    background: #f4f6fa; color: #1f2330;
+    font: 15px/1.7 -apple-system, "SF Pro Text", "PingFang SC", "Microsoft YaHei", sans-serif;
+  }
+  .paper { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 20px; margin: 0 0 6px; }
+  .meta { color: #6b7280; font-size: 13px; margin-bottom: 22px; }
+  .card {
+    background: #fff; border-radius: 14px; padding: 20px 22px;
+    box-shadow: 0 2px 12px rgba(20,30,60,.06); margin-bottom: 16px;
+  }
+  .stem { font-size: 15.5px; font-weight: 600; margin-bottom: 14px; }
+  ul.opts { list-style: none; margin: 0; padding: 0; }
+  ul.opts li {
+    padding: 9px 12px; border-radius: 9px; margin-bottom: 7px;
+    border: 1px solid #e6e9f0; cursor: pointer;
+  }
+  ul.opts li:hover { background: #f7f9fc; }
+  .optgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .optgrid .o { padding: 10px 12px; border: 1px solid #e6e9f0; border-radius: 9px; }
+  .console {
+    position: fixed; left: 14px; bottom: 14px; width: 300px;
+    background: #16181d; color: #e8eaf0; border-radius: 14px;
+    padding: 12px; font-size: 12px; z-index: 10;
+    box-shadow: 0 12px 32px rgba(0,0,0,.3);
+  }
+  .console h3 { margin: 0 0 8px; font-size: 12px; opacity: .7; font-weight: 500; }
+  .console input {
+    width: 100%; margin-bottom: 6px; padding: 6px 8px; border-radius: 7px;
+    border: 1px solid rgba(255,255,255,.15); background: rgba(255,255,255,.06);
+    color: #fff; font-size: 11px; font-family: ui-monospace, Menlo, monospace;
+  }
+  .console button {
+    width: 100%; padding: 7px; border-radius: 8px; border: none;
+    background: #6ee7a8; color: #10231a; font-weight: 700; font-size: 12px; cursor: pointer;
+  }
+  .console .tip { opacity: .45; font-size: 10.5px; margin-top: 7px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="paper">
+  <h1>第 3 章 · 计算机网络基础（练习）</h1>
+  <div class="meta">共 3 题 · 这是本地预览页，用来验证 Quiz Coach 的识别与交互</div>
+
+  <!-- 形态 A：ul > li -->
+  <div class="card">
+    <div class="stem">第 1 题　TCP 三次握手过程中，客户端发送的第一个报文段的标志位是？</div>
+    <ul class="opts">
+      <li>A. SYN=1，ACK=0</li>
+      <li>B. SYN=1，ACK=1</li>
+      <li>C. SYN=0，ACK=1</li>
+      <li>D. FIN=1，ACK=0</li>
+    </ul>
+  </div>
+
+  <!-- 形态 B：grid + 嵌套 span -->
+  <div class="card">
+    <div class="stem">第 2 题　下列哪个 HTTP 状态码表示「请求的资源被永久移动」？</div>
+    <div class="optgrid">
+      <div class="o"><span><b>A.</b></span> <span>301 Moved Permanently</span></div>
+      <div class="o"><span><b>B.</b></span> <span>302 Found</span></div>
+      <div class="o"><span><b>C.</b></span> <span>304 Not Modified</span></div>
+      <div class="o"><span><b>D.</b></span> <span>404 Not Found</span></div>
+    </div>
+  </div>
+
+  <!-- 形态 C：p 段落式，题号和选项挤在一行 -->
+  <div class="card">
+    <p><strong>第 3 题</strong>　IPv4 地址长度是多少位？</p>
+    <p>A、32 位</p>
+    <p>B、64 位</p>
+    <p>C、128 位</p>
+    <p>D、256 位</p>
+  </div>
+</div>
+
+<div class="console">
+  <h3>预览控制台（仅本地测试用）</h3>
+  <input id="apiBase" placeholder="API 地址">
+  <input id="apiKey" placeholder="API Key" type="password">
+  <input id="model" placeholder="模型名">
+  <button id="save">保存并刷新</button>
+  <div class="tip">写入 localStorage 后刷新页面。没填 Key 时点选项会提示「还没配置 API Key」。想不花额度测链路，把地址填成 <code>http://127.0.0.1:8789/v1/chat/completions</code> 并先运行 <code>python tools/mock_api.py</code>。</div>
+</div>
+
+<script>
+  const DEF = {
+    apiBase: 'https://api.deepseek.com/v1/chat/completions',
+    apiKey: '',
+    model: 'deepseek-chat'
+  };
+  (function initConsole() {
+    let st = {};
+    try { st = JSON.parse(localStorage.getItem('qc:settings') || '{}'); } catch (e) {}
+    const s = Object.assign({}, DEF, st);
+    document.getElementById('apiBase').value = s.apiBase;
+    document.getElementById('apiKey').value = s.apiKey;
+    document.getElementById('model').value = s.model;
+  })();
+  document.getElementById('save').addEventListener('click', () => {
+    const st = {
+      apiBase: document.getElementById('apiBase').value.trim() || DEF.apiBase,
+      apiKey: document.getElementById('apiKey').value.trim(),
+      model: document.getElementById('model').value.trim() || DEF.model
+    };
+    localStorage.setItem('qc:settings', JSON.stringify(st));
+    localStorage.removeItem('qc:sel:preview'); // 换 Key 后不影响标定
+    location.reload();
+  });
+</script>
+<script src="../Extension/Resources/content.js"></script>
+</body>
+</html>

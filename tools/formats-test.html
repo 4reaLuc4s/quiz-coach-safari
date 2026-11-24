@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>选项格式测试</title>
+<style>
+  body { margin:0; padding:18px; background:#f6f7f9; color:#1f2330;
+    font:14px/1.6 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif; }
+  .card { max-width:640px; margin:0 auto 14px; background:#fff; border-radius:10px;
+    padding:14px 16px; box-shadow:0 2px 8px rgba(20,30,60,.06); }
+  .stem { font-weight:600; margin-bottom:8px; }
+  ul { margin:0; padding:0; list-style:none; }
+  li { padding:6px 8px; border:1px solid #e6e9f0; border-radius:7px; margin-bottom:5px; }
+  .lab { display:inline-block; width:18px; color:#888; }
+  table { width:100%; border-collapse:collapse; }
+  td { padding:6px 8px; border:1px solid #e6e9f0; }
+  td.k { width:28px; color:#888; text-align:center; }
+  .row { display:flex; gap:8px; align-items:center;
+    padding:6px 8px; border:1px solid #e6e9f0; border-radius:7px; margin-bottom:5px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="stem">第 1 题　标号单独成一个元素，正文在兄弟节点里</div>
+  <ul>
+    <li><span class="lab">A</span><span>传输层</span></li>
+    <li><span class="lab">B</span><span>网络层</span></li>
+    <li><span class="lab">C</span><span>会话层</span></li>
+    <li><span class="lab">D</span><span>数据链路层</span></li>
+  </ul>
+</div>
+
+<div class="card">
+  <div class="stem">第 2 题　表格布局的选项</div>
+  <table>
+    <tr><td class="k">A</td><td>127.0.0.1</td></tr>
+    <tr><td class="k">B</td><td>192.168.0.1</td></tr>
+    <tr><td class="k">C</td><td>10.0.0.1</td></tr>
+    <tr><td class="k">D</td><td>172.16.0.1</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <div class="stem">第 3 题　空白圆钮 + 独立文本</div>
+  <div class="row"><input type="radio" name="q3"><span>UDP</span></div>
+  <div class="row"><input type="radio" name="q3"><span>IP</span></div>
+  <div class="row"><input type="radio" name="q3"><span>ARP</span></div>
+  <div class="row"><input type="radio" name="q3"><span>ICMP</span></div>
+</div>
+
+<div class="card">
+  <div class="stem">第 4 题　数字编号</div>
+  <ul>
+    <li>1、DNS</li>
+    <li>2、DHCP</li>
+    <li>3、FTP</li>
+    <li>4、SMTP</li>
+  </ul>
+</div>
+
+<script src="../userscript/quiz-coach.user.js"></script>
+</body>
+</html>

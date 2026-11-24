@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quiz Coach</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 13px; width: 286px;
+    background: #ffffff; color: #222222;
+    font: 12px/1.5 -apple-system, "SF Pro Text", "PingFang SC", "Microsoft YaHei", sans-serif;
+  }
+  h1 { font-size: 12.5px; margin: 0 0 2px; font-weight: 600; }
+  .sub { font-size: 10.5px; color: #999999; margin-bottom: 12px; }
+  label { display: block; font-size: 10.5px; color: #888888; margin: 10px 0 4px; }
+  input[type=text], input[type=password] {
+    width: 100%; padding: 6px 8px; border-radius: 6px;
+    border: 1px solid #e2e2e2; background: #ffffff; color: #222222;
+    font-size: 11px; font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    -webkit-appearance: none;
+  }
+  input:focus { outline: 1px solid #999999; border-color: #999999; }
+  .row { display: flex; gap: 6px; align-items: center; }
+  .btn {
+    flex: 1; padding: 7px; border-radius: 7px; border: 1px solid #e0e0e0;
+    background: #ffffff; color: #333333; font-size: 11px;
+    font-family: inherit; cursor: pointer;
+  }
+  .btn:active { background: #f4f4f4; }
+  .btn.pri { background: #222222; color: #ffffff; border-color: #222222; font-weight: 600; }
+  .btn:disabled { opacity: .45; }
+  .msg { font-size: 10.5px; margin-top: 8px; min-height: 15px; line-height: 1.5; word-break: break-all; color: #666666; }
+  .stat { display: flex; gap: 14px; margin-top: 12px; padding-top: 10px;
+    border-top: 1px solid #eeeeee; font-size: 10.5px; color: #888888; }
+  .stat b { font-size: 13px; display: block; color: #222222; font-weight: 600; }
+  .hint { font-size: 10px; color: #aaaaaa; line-height: 1.5; margin-top: 6px; }
+  code { font-family: ui-monospace, Menlo, monospace; }
+</style>
+</head>
+<body>
+  <h1>Quiz Coach</h1>
+  <div class="sub">点开就出答案 · 学习辅助</div>
+
+  <label>API 地址（OpenAI 兼容）</label>
+  <input type="text" id="apiBase" spellcheck="false" placeholder="https://api.deepseek.com/v1/chat/completions">
+
+  <label>API Key</label>
+  <input type="password" id="apiKey" spellcheck="false" autocomplete="off" placeholder="sk-...">
+
+  <label>模型</label>
+  <input type="text" id="model" spellcheck="false" placeholder="deepseek-chat">
+
+  <div class="row" style="margin-top:12px">
+    <button class="btn" id="test">测试连接</button>
+    <button class="btn pri" id="save">保存</button>
+  </div>
+  <div class="msg" id="msg"></div>
+
+  <div class="stat">
+    <div>已答 <b id="total">0</b></div>
+  </div>
+
+  <div class="row" style="margin-top:10px">
+    <button class="btn" id="clear">清空标定</button>
+  </div>
+
+  <div class="hint">
+    默认走 DeepSeek，可以直接从浏览器请求。<br>
+    换别家时填各自的 <code>/v1/chat/completions</code> 端点。<br>
+    Key 只存在本机，不会上传到任何中转。<br>
+    仅用于自测、练习与对答案，请勿用于考试作弊。
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

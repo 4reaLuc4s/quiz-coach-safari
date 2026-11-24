@@ -1,0 +1,18 @@
+// ==UserScript==
+// @name         Quiz Coach
+// @namespace    quiz-coach.local
+// @version      1.1.9
+// @description  学习辅助：读取网页选择题并给出答案，支持论述题英文写作。
+// @match        *://*/*
+// @run-at       document-idle
+// @grant        none
+// ==/UserScript==
+
+// ↓↓↓ 把 apiKey 填上，然后传到 iPad。填这里 = 所有网站通用；留空则只在卡片的设置里逐站填。
+window.__QUIZ_COACH_CONFIG__ = {
+  apiBase: 'https://api.deepseek.com/v1/chat/completions',
+  apiKey: '',
+  model: 'deepseek-chat'
+};
+
+
