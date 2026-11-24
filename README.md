@@ -1,5 +1,7 @@
 # Quiz Coach
 
+**中文** | [English](README.en.md)
+
 > 网页上的选择题，点开就出答案。一张半透明小卡片，Chrome / Edge 扩展和 iPad Safari 都能用。
 
 A tiny floating card that answers multiple-choice questions on web pages. Essay mode turns a pasted prompt into a concise English answer you can copy in one tap.
@@ -75,6 +77,42 @@ A tiny floating card that answers multiple-choice questions on web pages. Essay 
   - 剪贴板是两步：① 先粘题目 → 下一步 ② 再粘选项 → 出答案。选项 `A/B/C/D` 和 `1/2/3/4` 都认，每行一个最稳。
 - 答案最下面有两个小文字按钮：**认错了？标定** 和 **粘贴**。
 - A 模式生成后只显示「答案已生成 · 约 N 词 / 点「复制」直接拿走」，浮窗尺寸不变。
+
+## 模型配置
+
+默认配置在代码里写死为：
+
+| 项 | 默认值 |
+|---|---|
+| API 地址 | `https://api.deepseek.com/v1/chat/completions` |
+| 模型 | `deepseek-chat` |
+| API Key | 空，需要自己填 |
+
+设置入口：
+
+- **扩展**：工具栏 Quiz Coach 图标 → 填 API 地址 / Key / 模型 → 保存
+- **用户脚本**：长按卡片顶部标题 0.7 秒（桌面右键）→ 设置；或直接改 `quiz-coach.user.js` 顶部的 `__QUIZ_COACH_CONFIG__`
+
+换模型是可行的，前提是对方提供 **OpenAI 兼容** 的 `POST /v1/chat/completions`（`Authorization: Bearer <key>`，请求体和返回体同 OpenAI）。示例（模型名只是示例，以厂商控制台为准）：
+
+| 厂商 | API 地址示例 | 模型示例 |
+|---|---|---|
+| DeepSeek | `https://api.deepseek.com/v1/chat/completions` | `deepseek-chat` |
+| 硅基流动 | `https://api.siliconflow.cn/v1/chat/completions` | `Qwen/Qwen2.5-7B-Instruct` 等 |
+| 阿里百炼 | `https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions` | `qwen-plus` |
+| 智谱 | `https://open.bigmodel.cn/api/paas/v4/chat/completions` | `glm-4-flash` |
+| OpenRouter | `https://openrouter.ai/api/v1/chat/completions` | `openai/gpt-4o-mini` 等 |
+| OpenAI | `https://api.openai.com/v1/chat/completions` | `gpt-4o-mini` 等 |
+| Ollama（本地） | `http://127.0.0.1:11434/v1/chat/completions` | `qwen2.5:7b` 等 |
+
+注意：
+
+- **C 模式**要求模型能严格按提示输出 JSON（`answer` / `confidence` / `explain`）；指令跟随差的模型可能解析失败。
+- **A 模式**要求模型能写英文，并尽量遵守 150 words 上限；超了客户端会再请求一次压缩。
+- 目前**不支持图片/视觉模型**，纯文本模型就够。
+- 能否浏览器直连取决于厂商的 **CORS**。报 `Load failed` / `Failed to fetch` 时，换允许直连的端点或自建代理；Ollama 需要设置 `OLLAMA_ORIGINS=*`。
+- Azure OpenAI、Gemini 原生、Claude 原生等**不是 OpenAI 兼容格式**，不能直接填，需要兼容层/网关。
+- 卡片界面和 C 模式解析目前是中文；A 模式输出固定英文。
 
 ## 识别策略
 
@@ -152,6 +190,7 @@ quiz-coach/
 │   └── serve.cmd
 ├── docs/                     # 截图
 ├── LICENSE
+├── README.en.md              # English version
 └── README.md
 ```
 
