@@ -161,7 +161,7 @@ A tiny floating card that answers multiple-choice questions on web pages. Built 
 ## 本地预览 / 开发
 
 ```powershell
-cd quiz-coach
+cd quiz-coach-safari
 python -m http.server 8788
 ```
 
@@ -187,7 +187,7 @@ cat tools/userscript-header.txt Extension/Resources/content.js > userscript/quiz
 ## 目录结构
 
 ```
-quiz-coach/
+quiz-coach-safari/
 ├── Extension/Resources/      # Chrome/Edge 扩展 + Safari 扩展资源
 │   ├── content.js            # ★ 唯一逻辑源
 │   ├── manifest.json

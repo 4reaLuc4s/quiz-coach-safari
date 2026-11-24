@@ -157,7 +157,7 @@ This project is for self-testing, practice, checking answers and study assistanc
 ## Local preview / development
 
 ```powershell
-cd quiz-coach
+cd quiz-coach-safari
 python -m http.server 8788
 ```
 
@@ -183,7 +183,7 @@ cat tools/userscript-header.txt Extension/Resources/content.js > userscript/quiz
 ## Directory layout
 
 ```
-quiz-coach/
+quiz-coach-safari/
 ├── Extension/Resources/      # Chrome/Edge + Safari extension resources
 │   ├── content.js            # ★ the only source of logic
 │   ├── manifest.json
