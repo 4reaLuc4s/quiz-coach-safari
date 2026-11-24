@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Quiz Coach
 // @namespace    quiz-coach.local
-// @version      1.1.9
+// @version      1.2.0
 // @description  学习辅助：读取网页选择题并给出答案，支持论述题英文写作。
 // @match        *://*/*
 // @run-at       document-idle
@@ -12,7 +12,8 @@
 window.__QUIZ_COACH_CONFIG__ = {
   apiBase: 'https://api.deepseek.com/v1/chat/completions',
   apiKey: '',
-  model: 'deepseek-chat'
+  model: 'deepseek-chat',
+  lang: 'auto'   // 'auto' | 'zh' | 'en'
 };
 
 
@@ -37,7 +38,7 @@ window.__QUIZ_COACH_CONFIG__ = {
   const HAS_EXT = !!(EXT && EXT.runtime && EXT.runtime.id);
   const IS_TOP = (() => { try { return window.top === window.self; } catch (e) { return false; } })();
   const HOST = location.hostname || 'local';
-  const VERSION = '1.1.9';
+  const VERSION = '1.2.0';
 
   /* --------------------------------------------------------------- 常量 */
   const BOOT_CFG = (() => {
@@ -48,6 +49,7 @@ window.__QUIZ_COACH_CONFIG__ = {
     apiBase: 'https://api.deepseek.com/v1/chat/completions',
     apiKey: '',
     model: 'deepseek-chat',
+    lang: 'auto',
     position: null
   }, BOOT_CFG);
 
@@ -55,6 +57,190 @@ window.__QUIZ_COACH_CONFIG__ = {
   // "A. xxx" / "A、xxx" / "（A）xxx" / "1. xxx" / "1、xxx" / "①xxx"
   const OPT_RE = /^\s*[（(\[【]?\s*([A-Ha-h]|[1-9]|[①②③④⑤⑥⑦⑧⑨])\s*[)）\]】.、,:：．]\s*([^\s][\s\S]*)$/;
   const CIRCLE_RE = /^\s*([①②③④⑤⑥⑦⑧⑨])\s*([^\s][\s\S]*)$/;
+
+  /* --------------------------------------------------------------- 多语言 */
+  const I18N = {
+    zh: {
+      qTitle: (n) => '第 ' + n + ' 题',
+      essayTitle: '论述题',
+      modeTipC: '当前：选择题模式（点一下切到论述题）',
+      modeTipA: '当前：论述题模式（点一下切到选择题）',
+      refresh: '刷新',
+      close: '关闭',
+      apiBase: 'API 地址',
+      apiKey: 'API Key',
+      model: '模型',
+      language: '语言',
+      langAuto: '自动（跟随浏览器）',
+      langZh: '中文',
+      langEn: 'English',
+      keyNote: 'Key 只存在这台设备的本地存储里。',
+      calibrateSite: '标定这个网站的题目位置',
+      cancel: '取消',
+      save: '保存',
+      calStep0: '① 点一下页面上的「题干」',
+      calStep1: '② 点一下包住「所有选项」的容器',
+      calNote: '标定一次，这个网站以后都能自动识别。',
+      calNote2: '如果点错了，点下面的「重来」。',
+      restart: '重来',
+      cancelCal: '取消标定',
+      pasteQ: '① 粘贴题目（长按输入框 → 粘贴）',
+      pasteO: '② 粘贴选项（A/B/C/D 或 1/2/3/4 都行）',
+      pasteQPH: '第 1 题 …',
+      pasteOPH: 'A. …&#10;B. …&#10;C. …&#10;D. …',
+      pasteOne: '一键粘贴',
+      next: '下一步',
+      answer: '出答案',
+      back: '上一步',
+      reextract: '重新提取',
+      readClipboard: '读剪贴板',
+      calibrate: '标定',
+      noQuestionLong: '还没抓到题目。可以：① 长按选中题干和选项并复制，回来点「读剪贴板」；② 长按标题 0.7 秒进设置，点「标定」；③ 如果题目在 iframe 里，刷新页面。',
+      essayDetected: '这是论述 / 简答题。点标题栏的 A 切到论述题模式，粘贴题目就能写答案。',
+      noQuestion: '还没抓到题目。',
+      selectionNoOptions: '选中的文字里没找到至少两个选项（A. B. C. D. 这种）。',
+      calFailed: '标定失败：按你点的位置读不到题干或至少两个选项。重试一次，第二步尽量点「包住所有选项」的那个外框。',
+      configNote: '长按卡片顶部标题 0.7 秒，打开设置填 API 地址 / Key / 模型。',
+      retry: '重试',
+      noDataHint: '还没抓到题目。<br>先点「重新提取」；如果这个网站结构特殊，用「手动标定」点两下就好。',
+      manualCal: '手动标定',
+      autoTag: '自动识别',
+      selectionTag: '来自选区',
+      uncertain: '不确定',
+      wrongCal: '认错了？标定',
+      paste: '粘贴',
+      getting: '正在取答案…',
+      writing: '正在写答案…',
+      generatedWith: (size) => size ? '答案已生成 · 约 ' + size : '答案已生成',
+      copyHint: '点「复制」直接拿走',
+      newQuestion: '换一题',
+      rewrite: '重写',
+      copy: '复制',
+      copied: '已复制',
+      copyFailed: '复制失败',
+      essayMode: '论述题模式',
+      essayPH: '把论述题贴在这里…',
+      generate: '生成答案',
+      pasteFirst: '先把题目粘进来。',
+      noKey: '还没配置 API Key。长按卡片顶部 0.7 秒，打开设置填上。',
+      answerFailed: (e) => '取答案失败：' + e,
+      genFailed: (e) => '生成失败：' + e,
+      genFailedShort: '生成失败',
+      clipboardBlocked: '浏览器不让直接读剪贴板：长按输入框 → 选「粘贴」。',
+      clipboardFilled: '题目已填入。复制好选项后点「下一步」。',
+      optionsEmpty: '选项还没粘进来。',
+      stillQuestion: '剪贴板里还是题目。先去复制 A/B/C/D（或 1/2/3/4）那几行。',
+      notOptions: '这不像选项（像是题目段落）。每行一个选项最稳。',
+      questionEmpty: '题目还没粘进来。',
+      unrecognizedQuestion: '（未识别到题干）',
+      chars: ' 字',
+      words: ' 词',
+      jsonOnly: '只输出 JSON。',
+      essaySystem: '你在帮同学写论述题作业，答案用英语。只输出答案正文。',
+      compressSystem: '你在压缩一段英语论述题答案。只输出压缩后的正文。',
+      modelNoJSON: '模型没有返回 JSON',
+      invalidAnswer: (a) => '模型返回的 answer 不是选项字母：' + a,
+      emptyResponse: '模型返回为空'
+    },
+    en: {
+      qTitle: (n) => 'Question ' + n,
+      essayTitle: 'Essay',
+      modeTipC: 'Multiple-choice mode (click to switch to essay)',
+      modeTipA: 'Essay mode (click to switch to multiple-choice)',
+      refresh: 'Refresh',
+      close: 'Close',
+      apiBase: 'API endpoint',
+      apiKey: 'API key',
+      model: 'Model',
+      language: 'Language',
+      langAuto: 'Auto (follow browser)',
+      langZh: '中文',
+      langEn: 'English',
+      keyNote: "The key is stored only in this device's local storage.",
+      calibrateSite: 'Calibrate question position on this site',
+      cancel: 'Cancel',
+      save: 'Save',
+      calStep0: '① Click the question stem on the page',
+      calStep1: '② Click the container that holds all options',
+      calNote: 'Calibrate once; this site will be recognized automatically from now on.',
+      calNote2: 'If you clicked the wrong element, use Restart below.',
+      restart: 'Restart',
+      cancelCal: 'Cancel calibration',
+      pasteQ: '① Paste the question (long-press the box → Paste)',
+      pasteO: '② Paste the options (A/B/C/D or 1/2/3/4)',
+      pasteQPH: 'Question 1 …',
+      pasteOPH: 'A. …&#10;B. …&#10;C. …&#10;D. …',
+      pasteOne: 'Paste',
+      next: 'Next',
+      answer: 'Answer',
+      back: 'Back',
+      reextract: 'Extract again',
+      readClipboard: 'Read clipboard',
+      calibrate: 'Calibrate',
+      noQuestionLong: 'No question detected. You can: (1) select the question and options, copy them, then click "Read clipboard"; (2) long-press the title for 0.7 s, open settings, then click "Calibrate"; (3) if the question is inside an iframe, reload the page.',
+      essayDetected: 'This looks like an essay / short-answer question. Click A in the card header to switch to essay mode, then paste the prompt.',
+      noQuestion: 'No question detected yet.',
+      selectionNoOptions: 'Could not find at least two options (A. B. C. D. style) in the selection.',
+      calFailed: 'Calibration failed: the selected position does not contain a question and at least two options. Try again; for the second click, pick the container that holds all options.',
+      configNote: 'Long-press the card title for 0.7 s to open settings and fill in the API endpoint / key / model.',
+      retry: 'Retry',
+      noDataHint: 'No question detected yet.<br>Try "Extract again"; if this site has an unusual structure, use "Manual calibration" and click twice.',
+      manualCal: 'Manual calibration',
+      autoTag: 'Auto-detected',
+      selectionTag: 'From selection',
+      uncertain: 'Uncertain',
+      wrongCal: 'Wrong question? Calibrate',
+      paste: 'Paste',
+      getting: 'Getting answer…',
+      writing: 'Writing answer…',
+      generatedWith: (size) => size ? 'Answer ready · about ' + size : 'Answer ready',
+      copyHint: 'Tap "Copy" to grab it',
+      newQuestion: 'New question',
+      rewrite: 'Rewrite',
+      copy: 'Copy',
+      copied: 'Copied',
+      copyFailed: 'Copy failed',
+      essayMode: 'Essay mode',
+      essayPH: 'Paste the essay prompt here…',
+      generate: 'Generate answer',
+      pasteFirst: 'Paste the prompt first.',
+      noKey: 'No API key configured. Long-press the card title for 0.7 s to open settings.',
+      answerFailed: (e) => 'Failed to get answer: ' + e,
+      genFailed: (e) => 'Generation failed: ' + e,
+      genFailedShort: 'Generation failed',
+      clipboardBlocked: 'The browser blocked clipboard access: long-press the input box and choose "Paste".',
+      clipboardFilled: 'Question pasted. Copy the options, then click Next.',
+      optionsEmpty: 'The options are still empty.',
+      stillQuestion: 'The clipboard still contains the question. Copy the A/B/C/D (or 1/2/3/4) lines first.',
+      notOptions: 'This does not look like options (it looks like a question paragraph). One option per line works best.',
+      questionEmpty: 'The question is still empty.',
+      unrecognizedQuestion: '(question not detected)',
+      chars: ' chars',
+      words: ' words',
+      jsonOnly: 'Output JSON only.',
+      essaySystem: 'You are helping a classmate write an essay answer. Output only the answer body, in English.',
+      compressSystem: 'You are compressing an English essay answer. Output only the compressed body.',
+      modelNoJSON: 'The model did not return JSON',
+      invalidAnswer: (a) => 'The model returned an invalid answer letter: ' + a,
+      emptyResponse: 'The model returned an empty response'
+    }
+  };
+
+  function detectLang(pref) {
+    if (pref === 'zh' || pref === 'en') return pref;
+    const nav = String(navigator.language || 'en').toLowerCase();
+    return nav.indexOf('zh') === 0 ? 'zh' : 'en';
+  }
+
+  let LANG = detectLang('auto');
+
+  function t(key) {
+    const args = Array.prototype.slice.call(arguments, 1);
+    const table = (I18N[LANG] && Object.prototype.hasOwnProperty.call(I18N[LANG], key)) ? I18N[LANG] : I18N.zh;
+    const v = table[key];
+    return typeof v === 'function' ? v.apply(null, args) : (v == null ? key : v);
+  }
+
 
 
   /* --------------------------------------------------------------- 存储 */
@@ -242,6 +428,8 @@ window.__QUIZ_COACH_CONFIG__ = {
   function findNumber(text) {
     const t = String(text || '');
     let m = t.match(/第\s*(\d{1,3})\s*[题小]/);
+    if (m) return m[1];
+    m = t.match(/(?:question|problem|q)\s*(\d{1,3})\b/i);
     if (m) return m[1];
     m = t.match(/^\s*(\d{1,3})\s*[.、．]/);
     if (m) return m[1];
@@ -534,7 +722,7 @@ window.__QUIZ_COACH_CONFIG__ = {
     let q = text;
     for (const o of options) q = q.replace(o.text, '');
     q = q.split(/\r?\n/).map((l) => l.trim()).filter((l) => l && !matchOption(l)).join('\n').trim();
-    return { text: q || '(未识别到题干)', options: options, number: findNumber(q), source: 'selection' };
+    return { text: q || t('unrecognizedQuestion'), options: options, number: findNumber(q), source: 'selection' };
   }
 
   function extractQuestion(sel) {
@@ -554,6 +742,25 @@ window.__QUIZ_COACH_CONFIG__ = {
   /* ----------------------------------------------------------------- LLM */
   function buildPrompt(q, options) {
     const optText = options.map((o) => o.key + '. ' + o.text).join('\n');
+    if (LANG === 'en') {
+      return [
+        'Answer the following multiple-choice question and give a one-line explanation.',
+        '',
+        '[Question]',
+        q,
+        '',
+        '[Options]',
+        optText,
+        '',
+        'Output only one JSON object, no Markdown fences, no extra text. Fields:',
+        '{"answer":"the correct option letter (A/B/C/D as numbered above)",',
+        ' "confidence":a number between 0 and 1,',
+        ' "explain":"at most 25 words, key point only"}',
+        '',
+        'Keep the explanation extremely short. Do not repeat the question, do not expand.',
+        'If the question is incomplete or ambiguous, set confidence below 0.5 and state what is missing in explain.'
+      ].join('\n');
+    }
     return [
       '请答出下面这道选择题的正确选项，并给一句讲解。',
       '',
@@ -578,13 +785,13 @@ window.__QUIZ_COACH_CONFIG__ = {
     s = s.replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
     const a = s.indexOf('{');
     const b = s.lastIndexOf('}');
-    if (a < 0 || b <= a) throw new Error('模型没有返回 JSON');
+    if (a < 0 || b <= a) throw new Error(t('modelNoJSON'));
     const obj = JSON.parse(s.slice(a, b + 1));
     let answer = String(obj.answer || '').trim().toUpperCase();
     const circ = '①②③④⑤⑥⑦⑧⑨';
     if (circ.indexOf(answer) >= 0) answer = String(circ.indexOf(answer) + 1);
     if (/^[1-9]$/.test(answer)) answer = String.fromCharCode(64 + Number(answer));
-    if (!/^[A-H]$/.test(answer)) throw new Error('模型返回的 answer 不是选项字母：' + answer);
+    if (!/^[A-H]$/.test(answer)) throw new Error(t('invalidAnswer', answer));
     return {
       answer: answer,
       confidence: typeof obj.confidence === 'number' ? obj.confidence : 0.8,
@@ -598,7 +805,7 @@ window.__QUIZ_COACH_CONFIG__ = {
       model: settings.model,
       temperature: 0.1,
       messages: [
-        { role: 'system', content: '只输出 JSON。' },
+        { role: 'system', content: t('jsonOnly') },
         { role: 'user', content: buildPrompt(q, options) }
       ]
     };
@@ -616,7 +823,7 @@ window.__QUIZ_COACH_CONFIG__ = {
     }
     const json = await res.json();
     const content = (((json.choices || [])[0] || {}).message || {}).content || '';
-    if (!content) throw new Error('模型返回为空');
+    if (!content) throw new Error(t('emptyResponse'));
     return parseModelJSON(content);
   }
 
@@ -637,12 +844,18 @@ window.__QUIZ_COACH_CONFIG__ = {
     essay: '',
     essayBusy: false,
     prevPhase: null,
+    langPref: 'auto',
     settings: Object.assign({}, DEFAULT_SETTINGS),
     sel: null,
     calStep: 0,
     calTmp: {},
     pos: null
   };
+
+  function applyLang(pref) {
+    S.langPref = (pref === 'zh' || pref === 'en') ? pref : 'auto';
+    LANG = detectLang(S.langPref);
+  }
 
   let hostEl = null, shadow = null, wrapEl = null, clickBound = false;
 
@@ -742,6 +955,9 @@ window.__QUIZ_COACH_CONFIG__ = {
     font: 10px/1.35 -apple-system,"SF Pro Text",monospace; color: #777777; background: #ffffff;
     -webkit-appearance: none; }
   .field input:focus { outline: none; border-color: #999999; }
+  .field select { width: 100%; padding: 4px 5px; border: 1px solid #e2e2e2; border-radius: 4px;
+    font: 10px/1.35 -apple-system,"SF Pro Text",sans-serif; color: #777777; background: #ffffff; }
+  .field select:focus { outline: none; border-color: #999999; }
   #qc-paste, #qc-essay { display: block; width: 100%; margin-top: 4px; padding: 5px; border: 1px solid #e2e2e2;
     border-radius: 5px; font: 10px/1.45 -apple-system,"SF Pro Text",sans-serif; color: #777777;
     background: #ffffff; resize: none; -webkit-appearance: none; }
@@ -800,17 +1016,15 @@ window.__QUIZ_COACH_CONFIG__ = {
   }
 
   function header() {
-    const n = S.data && S.data.number ? '第 ' + esc(S.data.number) + ' 题' : '';
-    const title = S.mode === 'A' ? '<small>论述题</small>' : '<small>' + n + '</small>';
-    const modeTip = S.mode === 'A'
-      ? '当前：论述题模式（点一下切到选择题）'
-      : '当前：选择题模式（点一下切到论述题）';
+    const n = S.data && S.data.number ? t('qTitle', esc(S.data.number)) : '';
+    const title = S.mode === 'A' ? '<small>' + esc(t('essayTitle')) + '</small>' : '<small>' + n + '</small>';
+    const modeTip = S.mode === 'A' ? t('modeTipA') : t('modeTipC');
     return '<div class="hd" data-drag="1">' +
       '<div class="t" id="qc-title">' + title + '</div>' +
-      '<button class="ico" data-act="toggle-mode" title="' + modeTip + '">' +
+      '<button class="ico" data-act="toggle-mode" title="' + esc(modeTip) + '">' +
       (S.mode === 'A' ? 'A' : 'C') + '</button>' +
-      '<button class="ico" data-act="refresh" title="刷新">&#x21bb;</button>' +
-      '<button class="ico" data-act="close" title="关闭">&#x2715;</button>' +
+      '<button class="ico" data-act="refresh" title="' + esc(t('refresh')) + '">&#x21bb;</button>' +
+      '<button class="ico" data-act="close" title="' + esc(t('close')) + '">&#x2715;</button>' +
       '</div>';
   }
 
@@ -819,28 +1033,35 @@ window.__QUIZ_COACH_CONFIG__ = {
 
     if (S.phase === 'settings') {
       const st = S.settings || {};
+      const langPref = S.langPref || 'auto';
       return '<div class="bd">' +
-        '<div class="field"><label>API 地址</label>' +
+        '<div class="field"><label>' + esc(t('language')) + '</label>' +
+        '<select id="qc-lang">' +
+        '<option value="auto"' + (langPref === 'auto' ? ' selected' : '') + '>' + esc(t('langAuto')) + '</option>' +
+        '<option value="zh"' + (langPref === 'zh' ? ' selected' : '') + '>' + esc(t('langZh')) + '</option>' +
+        '<option value="en"' + (langPref === 'en' ? ' selected' : '') + '>' + esc(t('langEn')) + '</option>' +
+        '</select></div>' +
+        '<div class="field"><label>' + esc(t('apiBase')) + '</label>' +
         '<input id="qc-api-base" type="text" spellcheck="false" value="' + esc(st.apiBase || '') + '" placeholder="https://api.deepseek.com/v1/chat/completions"></div>' +
-        '<div class="field"><label>API Key</label>' +
+        '<div class="field"><label>' + esc(t('apiKey')) + '</label>' +
         '<input id="qc-api-key" type="password" spellcheck="false" value="' + esc(st.apiKey || '') + '" placeholder="sk-..."></div>' +
-        '<div class="field"><label>模型</label>' +
+        '<div class="field"><label>' + esc(t('model')) + '</label>' +
         '<input id="qc-model" type="text" spellcheck="false" value="' + esc(st.model || '') + '" placeholder="deepseek-chat"></div>' +
-        '<div class="note">Key 只存在这台设备的本地存储里。</div>' +
-        '<button class="btn" data-act="calibrate" style="width:100%;margin-top:8px">标定这个网站的题目位置</button>' +
+        '<div class="note">' + esc(t('keyNote')) + '</div>' +
+        '<button class="btn" data-act="calibrate" style="width:100%;margin-top:8px">' + esc(t('calibrateSite')) + '</button>' +
         '</div>' +
-        '<div class="bar"><button class="btn" data-act="cancel-settings">取消</button>' +
-        '<button class="btn pri" data-act="save-settings">保存</button></div>';
+        '<div class="bar"><button class="btn" data-act="cancel-settings">' + esc(t('cancel')) + '</button>' +
+        '<button class="btn pri" data-act="save-settings">' + esc(t('save')) + '</button></div>';
     }
 
     if (S.phase === 'calibrate') {
       return '<div class="calbar">' +
-        (S.calStep === 0 ? '① 点一下页面上的「题干」' : '② 点一下包住「所有选项」的容器') +
+        (S.calStep === 0 ? esc(t('calStep0')) : esc(t('calStep1'))) +
         '</div>' +
-        '<div class="bd"><div class="note">标定一次，这个网站以后都能自动识别。<br>' +
-        '如果点错了，点下面的「重来」。</div></div>' +
-        '<div class="bar"><button class="btn" data-act="cal-restart">重来</button>' +
-        '<button class="btn" data-act="cal-cancel">取消标定</button></div>';
+        '<div class="bd"><div class="note">' + esc(t('calNote')) + '<br>' +
+        esc(t('calNote2')) + '</div></div>' +
+        '<div class="bar"><button class="btn" data-act="cal-restart">' + esc(t('restart')) + '</button>' +
+        '<button class="btn" data-act="cal-cancel">' + esc(t('cancelCal')) + '</button></div>';
     }
 
     if (S.phase === 'paste') {
@@ -848,48 +1069,47 @@ window.__QUIZ_COACH_CONFIG__ = {
       const isQ = step === 1;
       return '<div class="bd">' +
         (S.msg ? '<div class="note" style="margin-bottom:4px">' + esc(S.msg) + '</div>' : '') +
-        '<div class="note">' + (isQ ? '① 粘贴题目（长按输入框 → 粘贴）' : '② 粘贴选项（A/B/C/D 或 1/2/3/4 都行）') + '</div>' +
+        '<div class="note">' + esc(isQ ? t('pasteQ') : t('pasteO')) + '</div>' +
         '<textarea id="' + (isQ ? 'qc-paste' : 'qc-paste2') + '" rows="' + (isQ ? 3 : 4) + '" spellcheck="false" placeholder="' +
-        (isQ ? '第 1 题 …' : 'A. …&#10;B. …&#10;C. …&#10;D. …') + '">' +
+        (isQ ? esc(t('pasteQPH')) : t('pasteOPH')) + '">' +
         esc(isQ ? (S.qText || '') : '') + '</textarea>' +
         '</div>' +
         '<div class="bar">' +
-        '<button class="btn" data-act="clip-fill">一键粘贴</button>' +
+        '<button class="btn" data-act="clip-fill">' + esc(t('pasteOne')) + '</button>' +
         (isQ
-          ? '<button class="btn pri" data-act="paste-next">下一步</button>' +
-            '<button class="btn" data-act="paste-cancel">取消</button>'
-          : '<button class="btn pri" data-act="paste-go">出答案</button>' +
-            '<button class="btn" data-act="paste-back">上一步</button>') +
+          ? '<button class="btn pri" data-act="paste-next">' + esc(t('next')) + '</button>' +
+            '<button class="btn" data-act="paste-cancel">' + esc(t('cancel')) + '</button>'
+          : '<button class="btn pri" data-act="paste-go">' + esc(t('answer')) + '</button>' +
+            '<button class="btn" data-act="paste-back">' + esc(t('back')) + '</button>') +
         '</div>';
     }
 
     if (S.phase === 'message') {
       return '<div class="bd"><div class="note">' + esc(S.msg) + '</div></div>' +
-        '<div class="bar"><button class="btn" data-act="refresh">重新提取</button>' +
-        '<button class="btn pri" data-act="clip">读剪贴板</button>' +
-        '<button class="btn" data-act="calibrate">标定</button></div>';
+        '<div class="bar"><button class="btn" data-act="refresh">' + esc(t('reextract')) + '</button>' +
+        '<button class="btn pri" data-act="clip">' + esc(t('readClipboard')) + '</button>' +
+        '<button class="btn" data-act="calibrate">' + esc(t('calibrate')) + '</button></div>';
     }
 
     if (S.phase === 'error') {
       return '<div class="bd">' +
         '<div class="err">' + esc(S.msg) + '</div>' +
         (S.data ? '<div class="qtext" style="margin-top:8px">' + esc(S.data.text) + '</div>' : '') +
-        '<div class="note" style="margin-top:8px">点右上角齿轮填 API 地址 / Key / 模型。</div>' +
+        '<div class="note" style="margin-top:8px">' + esc(t('configNote')) + '</div>' +
         '</div>' +
-        '<div class="bar"><button class="btn pri" data-act="retry">重试</button>' +
-        '<button class="btn" data-act="refresh">重新提取</button></div>';
+        '<div class="bar"><button class="btn pri" data-act="retry">' + esc(t('retry')) + '</button>' +
+        '<button class="btn" data-act="refresh">' + esc(t('reextract')) + '</button></div>';
     }
 
     if (!S.data) {
-      return '<div class="bd"><div class="note">还没抓到题目。<br>' +
-        '先点「重新提取」；如果这个网站结构特殊，用「手动标定」点两下就好。</div></div>' +
-        '<div class="bar"><button class="btn pri" data-act="refresh">重新提取</button>' +
-        '<button class="btn" data-act="calibrate">手动标定</button></div>';
+      return '<div class="bd"><div class="note">' + t('noDataHint') + '</div></div>' +
+        '<div class="bar"><button class="btn pri" data-act="refresh">' + esc(t('reextract')) + '</button>' +
+        '<button class="btn" data-act="calibrate">' + esc(t('manualCal')) + '</button></div>';
     }
 
     const d = S.data;
-    const srcTag = d.source === 'auto' ? '<span class="tag">自动识别</span>'
-      : d.source === 'selection' ? '<span class="tag">来自选区</span>' : '';
+    const srcTag = d.source === 'auto' ? '<span class="tag">' + esc(t('autoTag')) + '</span>'
+      : d.source === 'selection' ? '<span class="tag">' + esc(t('selectionTag')) + '</span>' : '';
 
     if (S.phase === 'result' && S.result) {
       const r = S.result;
@@ -899,28 +1119,28 @@ window.__QUIZ_COACH_CONFIG__ = {
         '<div class="row">' +
         '<div class="big">' + esc(ansLabel) + '</div>' +
         (picked ? '<div class="ansx">' + esc(picked.text) + '</div>' : '') +
-        (r.confidence != null && r.confidence < 0.6 ? '<span class="tag">不确定</span>' : '') +
+        (r.confidence != null && r.confidence < 0.6 ? '<span class="tag">' + esc(t('uncertain')) + '</span>' : '') +
         '</div>' +
         (r.explain ? '<div class="explain">' + esc(r.explain) + '</div>' : '') +
         '<div class="qtext">' + esc(d.text) + '</div>' +
-        '<div class="mini"><span data-act="calibrate">认错了？标定</span>' +
-        '<span data-act="clip">粘贴</span></div>' +
+        '<div class="mini"><span data-act="calibrate">' + esc(t('wrongCal')) + '</span>' +
+        '<span data-act="clip">' + esc(t('paste')) + '</span></div>' +
         '</div>';
     }
 
     // 取答案中
     return '<div class="bd">' +
       '<div class="qtext">' + esc(d.text) + ' ' + srcTag + '</div>' +
-      '<div class="note"><span class="spin"></span>正在取答案…</div>' +
+      '<div class="note"><span class="spin"></span>' + esc(t('getting')) + '</div>' +
       '</div>';
   }
 
   // A 模式：只走粘贴 → 生成论述答案 → 一键复制（不在卡片里展示正文，尺寸保持不变）
   function essaySize(s) {
-    const t = String(s || '').trim();
-    if (!t) return '';
-    if (/[\u4e00-\u9fff]/.test(t)) return t.replace(/\s+/g, '').length + ' 字';
-    return t.split(/\s+/).filter(Boolean).length + ' 词';
+    const txt = String(s || '').trim();
+    if (!txt) return '';
+    if (/[\u4e00-\u9fff]/.test(txt)) return txt.replace(/\s+/g, '').length + t('chars');
+    return txt.split(/\s+/).filter(Boolean).length + t('words');
   }
 
   function essayBody() {
@@ -928,47 +1148,47 @@ window.__QUIZ_COACH_CONFIG__ = {
 
     if (S.phase === 'essay-busy') {
       return '<div class="bd"><div class="done">' +
-        '<span><span class="spin"></span>正在写答案…</span>' +
+        '<span><span class="spin"></span>' + esc(t('writing')) + '</span>' +
         '</div></div>' +
         '<div class="bar">' +
-        '<button class="btn" disabled>换一题</button>' +
-        '<button class="btn" disabled>重写</button>' +
-        '<button class="btn pri" disabled>复制</button>' +
+        '<button class="btn" disabled>' + esc(t('newQuestion')) + '</button>' +
+        '<button class="btn" disabled>' + esc(t('rewrite')) + '</button>' +
+        '<button class="btn pri" disabled>' + esc(t('copy')) + '</button>' +
         '</div>';
     }
 
     if (S.phase === 'essay-result') {
       const size = essaySize(S.essay);
       return '<div class="bd"><div class="done">' +
-        '答案已生成' + (size ? ' · 约 ' + esc(size) : '') +
-        '<small>点「复制」直接拿走</small>' +
+        esc(t('generatedWith', size)) +
+        '<small>' + esc(t('copyHint')) + '</small>' +
         '</div></div>' +
         '<div class="bar">' +
-        '<button class="btn" data-act="essay-new">换一题</button>' +
-        '<button class="btn" data-act="essay-go">重写</button>' +
-        '<button class="btn pri" data-act="essay-copy">复制</button>' +
+        '<button class="btn" data-act="essay-new">' + esc(t('newQuestion')) + '</button>' +
+        '<button class="btn" data-act="essay-go">' + esc(t('rewrite')) + '</button>' +
+        '<button class="btn pri" data-act="essay-copy">' + esc(t('copy')) + '</button>' +
         '</div>';
     }
 
     if (S.phase === 'essay-error') {
       return '<div class="bd"><div class="done">' +
-        esc(S.msg || '生成失败') +
+        esc(S.msg || t('genFailedShort')) +
         '</div></div>' +
         '<div class="bar">' +
-        '<button class="btn" data-act="essay-new">换一题</button>' +
-        '<button class="btn pri" data-act="essay-go">重试</button>' +
+        '<button class="btn" data-act="essay-new">' + esc(t('newQuestion')) + '</button>' +
+        '<button class="btn pri" data-act="essay-go">' + esc(t('retry')) + '</button>' +
         '</div>';
     }
 
     return '<div class="bd">' +
       (S.msg ? '<div class="note" style="margin-bottom:4px">' + esc(S.msg) + '</div>' : '') +
-      '<div class="note">论述题模式</div>' +
-      '<textarea id="qc-essay" rows="4" spellcheck="false" placeholder="把论述题贴在这里…">' +
+      '<div class="note">' + esc(t('essayMode')) + '</div>' +
+      '<textarea id="qc-essay" rows="4" spellcheck="false" placeholder="' + esc(t('essayPH')) + '">' +
       esc(q) + '</textarea>' +
       '</div>' +
       '<div class="bar">' +
-      '<button class="btn" data-act="essay-paste">一键粘贴</button>' +
-      '<button class="btn pri" data-act="essay-go">生成答案</button>' +
+      '<button class="btn" data-act="essay-paste">' + esc(t('pasteOne')) + '</button>' +
+      '<button class="btn pri" data-act="essay-go">' + esc(t('generate')) + '</button>' +
       '</div>';
   }
 
@@ -1148,7 +1368,7 @@ window.__QUIZ_COACH_CONFIG__ = {
         break;
       case 'cancel-settings':
         if (S.mode === 'A') { restoreEssayPhase(); break; }
-        if (!S.data) { S.phase = 'message'; S.msg = '还没抓到题目。'; render(); break; }
+        if (!S.data) { S.phase = 'message'; S.msg = t('noQuestion'); render(); break; }
         if (!S.result) { askAnswer(); break; }
         S.phase = 'result';
         render();
@@ -1161,7 +1381,8 @@ window.__QUIZ_COACH_CONFIG__ = {
         const next = Object.assign({}, S.settings, {
           apiBase: val('qc-api-base') || DEFAULT_SETTINGS.apiBase,
           apiKey: val('qc-api-key'),
-          model: val('qc-model') || DEFAULT_SETTINGS.model
+          model: val('qc-model') || DEFAULT_SETTINGS.model,
+          lang: val('qc-lang') || 'auto'
         });
         saveSettings(next);
         break;
@@ -1184,7 +1405,7 @@ window.__QUIZ_COACH_CONFIG__ = {
       case 'paste-next': {
         const ta = shadow.getElementById('qc-paste');
         const v = ta ? String(ta.value || '').trim() : '';
-        if (!v) { S.msg = '题目还没粘进来。'; render(); break; }
+        if (!v) { S.msg = t('questionEmpty'); render(); break; }
         S.qText = v;
         S.clipRaw = '';
         S.msg = '';
@@ -1206,7 +1427,7 @@ window.__QUIZ_COACH_CONFIG__ = {
       case 'paste-cancel':
         if (!S.data) {
           S.phase = 'message';
-          S.msg = '还没抓到题目。';
+          S.msg = t('noQuestion');
           render();
           break;
         }
@@ -1265,6 +1486,21 @@ window.__QUIZ_COACH_CONFIG__ = {
   }
 
   function buildEssayPrompt(q) {
+    if (LANG === 'en') {
+      return [
+        '[Prompt]',
+        String(q || '').trim(),
+        '',
+        'Write a ready-to-submit essay answer that follows these rules:',
+        '1. Write in English only. Answer in English even if the prompt is in Chinese.',
+        '2. Output the answer body only. No "Answer:" prefix, no Markdown fences, no headings; use natural "First / Second / Third" phrasing for points.',
+        '3. Strictly at most 150 words. If you go over, rephrase or merge points; do not cut a sentence in half, and the final sentence must be complete. Use as many points as the question needs — not a fixed number. One point per paragraph, with a blank line between paragraphs.',
+        '4. You are an ordinary college student: you have basic knowledge, but the logic does not need to be airtight; be a little colloquial, give one or two ordinary examples, occasionally repeat or wander a bit.',
+        '5. Do not sound too professional: avoid stacking jargon, avoid a rigid template, and do not end with a grand slogan.',
+        '6. Allow small imperfections (an ordinary example, a slightly jumpy paragraph) so it reads like a person wrote it.',
+        '7. Do not mention these instructions or explain how you wrote it.'
+      ].join('\n');
+    }
     return [
       '【题目】',
       String(q || '').trim(),
@@ -1294,6 +1530,22 @@ window.__QUIZ_COACH_CONFIG__ = {
 
   // 超过 150 词时：先让模型换说法/合并观点重写；实在压不下来才按完整句子取舍，绝不截半句
   function buildCompressPrompt(text, max, attempt) {
+    if (LANG === 'en') {
+      const lines = [
+        'This English essay answer currently has ' + countWords(text) + ' words, over the ' + max + '-word limit.',
+        'Rewrite it more concisely — change the wording and merge similar points — so that it is within ' + max + ' words without losing the main ideas.',
+        '',
+        'Requirements:',
+        '1. Keep it in English, in an ordinary college-student voice; the logic does not need to be airtight and it should not sound too professional.',
+        '2. Every sentence must be complete, including the final one; no ellipsis and no half sentence.',
+        '3. Output only the compressed answer body. No explanation, no "Answer:" prefix, no Markdown.'
+      ];
+      if (attempt > 1) {
+        lines.push('4. Note: the previous compression was still over the limit. This time it must be shorter, and the ending must still be a complete sentence.');
+      }
+      lines.push('', '[Original]', text);
+      return lines.join('\n');
+    }
     const lines = [
       '下面这段英语论述题答案现在有 ' + countWords(text) + ' words，超过了 ' + max + ' words 的上限。',
       '请在不丢掉主要观点的前提下，换更简洁的说法、合并相近的观点，把它压缩到 ' + max + ' words 以内。',
@@ -1334,24 +1586,24 @@ window.__QUIZ_COACH_CONFIG__ = {
   }
 
   async function ensureEssayLimit(settings, text, max) {
-    let t = text;
-    for (let i = 0; i < 2 && countWords(t) > max; i++) {
+    let draft = text;
+    for (let i = 0; i < 2 && countWords(draft) > max; i++) {
       try {
         const raw = await postChat(
           settings,
-          '你在压缩一段英语论述题答案。只输出压缩后的正文。',
-          buildCompressPrompt(t, max, i + 1),
+          t('compressSystem'),
+          buildCompressPrompt(draft, max, i + 1),
           0.5
         );
         const next = parseEssayText(raw);
         if (!next) break;
-        if (countWords(next) < countWords(t)) t = next;
+        if (countWords(next) < countWords(draft)) draft = next;
         else if (i === 1) break;
       } catch (e) {
         break;
       }
     }
-    return ensureEndPunct(countWords(t) <= max ? t : cutToCompleteSentences(t, max));
+    return ensureEndPunct(countWords(draft) <= max ? draft : cutToCompleteSentences(draft, max));
   }
 
   async function postChat(settings, system, prompt, temperature) {
@@ -1383,12 +1635,12 @@ window.__QUIZ_COACH_CONFIG__ = {
     if (!settings.apiKey) throw new Error('NO_KEY');
     const raw = await postChat(
       settings,
-      '你在帮同学写论述题作业，答案用英语。只输出答案正文。',
+      t('essaySystem'),
       buildEssayPrompt(q),
       0.9
     );
     const text = parseEssayText(raw);
-    if (!text) throw new Error('模型返回为空');
+    if (!text) throw new Error(t('emptyResponse'));
     return await ensureEssayLimit(settings, text, 150);
   }
 
@@ -1396,7 +1648,7 @@ window.__QUIZ_COACH_CONFIG__ = {
     const ta = shadow && shadow.getElementById('qc-essay');
     const v = ta ? String(ta.value || '').trim() : String(S.essayQ || '').trim();
     if (!v) {
-      S.msg = '先把题目粘进来。';
+      S.msg = t('pasteFirst');
       S.phase = 'essay';
       render();
       focusEssay();
@@ -1415,7 +1667,7 @@ window.__QUIZ_COACH_CONFIG__ = {
     if (!S.settings.apiKey) {
       S.essayBusy = false;
       S.phase = 'essay-error';
-      S.msg = '还没配置 API Key。长按卡片顶部 0.7 秒，在设置里填上。';
+      S.msg = t('noKey');
       render();
       return;
     }
@@ -1430,7 +1682,7 @@ window.__QUIZ_COACH_CONFIG__ = {
       S.essayBusy = false;
       if (S.mode === 'A') {
         S.phase = 'essay-error';
-        S.msg = '生成失败：' + (e && e.message ? e.message : String(e));
+        S.msg = t('genFailed', (e && e.message ? e.message : String(e)));
       }
       render();
     }
@@ -1446,7 +1698,7 @@ window.__QUIZ_COACH_CONFIG__ = {
 
     text = String(text || '').trim();
     if (!text) {
-      S.msg = '浏览器不让直接读剪贴板：长按输入框 → 选「粘贴」。';
+      S.msg = t('clipboardBlocked');
       S.phase = 'essay';
       render();
       focusEssay();
@@ -1488,12 +1740,12 @@ window.__QUIZ_COACH_CONFIG__ = {
     const ok = await copyText(S.essay);
     const btn = shadow && shadow.querySelector('[data-act="essay-copy"]');
     if (!btn) return;
-    btn.textContent = ok ? '已复制' : '复制失败';
+    btn.textContent = ok ? t('copied') : t('copyFailed');
     btn.disabled = true;
     setTimeout(() => {
       if (!btn.isConnected) return;
       btn.disabled = false;
-      btn.textContent = '复制';
+      btn.textContent = t('copy');
     }, 1200);
   }
 
@@ -1515,9 +1767,9 @@ window.__QUIZ_COACH_CONFIG__ = {
     if (!data) {
       S.phase = 'message';
       if (hasEssayField()) {
-        S.msg = '这是论述 / 简答题。点标题栏的 A 切到论述题模式，粘贴题目就能写答案。';
+        S.msg = t('essayDetected');
       } else {
-        S.msg = '没抓到题目。可以：① 长按选中题干和选项并复制，回来点「读剪贴板」；② 长按标题 0.7 秒进设置，点「标定」；③ 如果题目在 iframe 里，刷新页面。';
+        S.msg = t('noQuestionLong');
       }
       S.open = true;
       render();
@@ -1533,7 +1785,7 @@ window.__QUIZ_COACH_CONFIG__ = {
     const raw = window.getSelection ? String(window.getSelection()) : '';
     const data = parseFromSelection(raw);
     if (!data) {
-      S.msg = '选中的文字里没找到至少两个选项（A. B. C. D. 这种）。';
+      S.msg = t('selectionNoOptions');
       S.phase = 'message';
       render();
       return;
@@ -1562,7 +1814,7 @@ window.__QUIZ_COACH_CONFIG__ = {
   }
 
   function goAnswer(q, opts) {
-    const text = String(q || '').trim() || '(未识别到题干)';
+    const text = String(q || '').trim() || t('unrecognizedQuestion');
     S.data = {
       text: text,
       options: opts,
@@ -1603,14 +1855,14 @@ window.__QUIZ_COACH_CONFIG__ = {
     } catch (e) { text = ''; }
 
     if (!text || !String(text).trim()) {
-      S.msg = '浏览器不让直接读剪贴板，长按输入框 → 选「粘贴」。';
+      S.msg = t('clipboardBlocked');
       render();
       return;
     }
 
     if ((S.pasteStep || 1) === 1) {
       S.qText = String(text).trim();
-      S.msg = '题目已填入。复制好选项后点「下一步」。';
+      S.msg = t('clipboardFilled');
       render();
       focusPaste();
       return;
@@ -1625,18 +1877,18 @@ window.__QUIZ_COACH_CONFIG__ = {
   function submitOptions(raw) {
     const text = String(raw || '').trim();
     if (!text) {
-      S.msg = '选项还没粘进来。';
+      S.msg = t('optionsEmpty');
       render();
       return;
     }
     if (String(S.qText || '').trim() && text === String(S.qText).trim()) {
-      S.msg = '剪贴板里还是题目。先去复制 A/B/C/D（或 1/2/3/4）那几行。';
+      S.msg = t('stillQuestion');
       render();
       return;
     }
     const items = parseOptionsRaw(text);
     if (!optionsLookValid(items)) {
-      S.msg = '这不像选项（像是题目段落）。每行一个选项最稳。';
+      S.msg = t('notOptions');
       render();
       return;
     }
@@ -1652,7 +1904,7 @@ window.__QUIZ_COACH_CONFIG__ = {
 
     if (!S.settings.apiKey) {
       S.phase = 'error';
-      S.msg = '还没配置 API Key。长按卡片顶部那块空白 0.7 秒，打开设置填上。';
+      S.msg = t('noKey');
       render();
       return;
     }
@@ -1666,7 +1918,7 @@ window.__QUIZ_COACH_CONFIG__ = {
     } catch (e) {
       if (S.mode === 'C') {
         S.phase = 'error';
-        S.msg = '取答案失败：' + (e && e.message ? e.message : String(e));
+        S.msg = t('answerFailed', (e && e.message ? e.message : String(e)));
       }
       render();
     }
@@ -1682,6 +1934,7 @@ window.__QUIZ_COACH_CONFIG__ = {
   async function saveSettings(next) {
     S.settings = next;
     await Storage.set({ settings: next });
+    applyLang(next.lang);
     S.msg = '';
     if (S.mode === 'A') {
       S.prevPhase = null;
@@ -1769,7 +2022,7 @@ window.__QUIZ_COACH_CONFIG__ = {
     const test = extractFromCalibration(sel);
     if (!test) {
       S.phase = 'message';
-      S.msg = '标定失败：按你点的位置读不到题干或至少两个选项。重试一次，第二步尽量点「包住所有选项」的那个外框。';
+      S.msg = t('calFailed');
       render();
       return;
     }
@@ -1795,6 +2048,7 @@ window.__QUIZ_COACH_CONFIG__ = {
     if (!merged.apiKey && DEFAULT_SETTINGS.apiKey) merged.apiKey = DEFAULT_SETTINGS.apiKey;
     if (!merged.model && DEFAULT_SETTINGS.model) merged.model = DEFAULT_SETTINGS.model;
     S.settings = merged;
+    applyLang(merged.lang);
     S.pos = S.settings.position || null;
 
     const savedMode = (await Storage.get(['mode'])).mode;
@@ -1831,6 +2085,8 @@ window.__QUIZ_COACH_CONFIG__ = {
         if (area !== 'local') return;
         if (changes.settings) {
           S.settings = Object.assign({}, DEFAULT_SETTINGS, changes.settings.newValue || {});
+          applyLang(S.settings.lang);
+          if (S.open) render();
         }
         const key = 'sel:' + HOST;
         if (changes[key]) S.sel = changes[key].newValue || null;

@@ -12,11 +12,13 @@
 
 **C · Multiple-choice mode** — reads the question and options on the page.
 
-![Multiple-choice mode](docs/preview.jpg)
+![Multiple-choice mode](docs/preview-en.jpg)
 
 **A · Essay mode** — paste a prompt, get an English answer under 150 words, copy it in one tap.
 
-![Essay mode](docs/essay-mode.jpg)
+![Essay mode](docs/essay-mode-en.jpg)
+
+> Chinese screenshots: [README.md](README.md). The card UI follows the browser language by default and can be switched in settings.
 
 ## Features
 
@@ -68,6 +70,7 @@ For a native extension installation with a toolbar-based settings panel, use Xco
 
 - Tap the grey dot at the top-right to get the answer (usually 1–3 seconds).
 - The card header has three small round buttons: **A / C** (toggle mode), **↻** (refresh / next question), **✕** (collapse).
+- **Language**: follows the browser by default (Chinese / English); long-press the title and switch between Auto / 中文 / English in settings.
 - **Long-press the title for 0.7 s** (right-click on desktop) to open settings: endpoint / key / model, or calibrate the current site.
 - When detection fails, the footer shows **重新提取** (re-extract), **读剪贴板** (read clipboard), **标定** (calibrate).
   - Clipboard is two steps: paste the question, then the options. `A/B/C/D` and `1/2/3/4` are both accepted; one option per line works best.
@@ -108,7 +111,7 @@ Notes:
 - **No image/vision support** yet; a text-only model is enough.
 - Direct browser requests depend on the provider's **CORS** policy. If you see `Load failed` / `Failed to fetch`, use a CORS-enabled endpoint or your own proxy. Ollama needs `OLLAMA_ORIGINS=*`.
 - Native non-OpenAI APIs (Azure OpenAI, Gemini native, Claude native, etc.) are not compatible; use a compatibility layer or gateway.
-- The card UI and C-mode explanations are currently Chinese; A-mode output is always English.
+- The card UI follows the browser language by default (Chinese / English) and can be switched in settings. C-mode explanations follow the UI language; A-mode output is always English.
 
 ## How questions are detected
 
@@ -179,6 +182,7 @@ quiz-coach/
 │   └── quiz-coach.user.js    # generated; this is the iPad file
 ├── tools/
 │   ├── preview.html          # local preview
+│   ├── preview-en.html       # English preview page
 │   ├── userscript-test.html  # userscript test page
 │   ├── formats-test.html     # option-format test page
 │   ├── mock_api.py           # local mock model

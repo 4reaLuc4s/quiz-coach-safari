@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Quiz Coach",
-  "version": "1.1.9",
+  "version": "1.2.0",
   "description": "学习辅助：读取网页选择题并给出答案，支持论述题英文写作。仅用于自测与练习。",
   "permissions": ["storage"],
   "host_permissions": ["<all_urls>"],

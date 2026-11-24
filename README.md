@@ -20,6 +20,8 @@ A tiny floating card that answers multiple-choice questions on web pages. Essay 
 
 ![论述题模式](docs/essay-mode.jpg)
 
+> 英文版截图见 [README.en.md](README.en.md)；卡片界面默认跟随浏览器语言，设置里可切换。
+
 ---
 
 ## 功能
@@ -72,6 +74,7 @@ A tiny floating card that answers multiple-choice questions on web pages. Essay 
 
 - 点右上角的**小灰点** → 直接开始取答案，1–3 秒后出结果。
 - 卡片顶部有三个小圆钮：**A / C**（切模式）、**↻**（刷新 / 换一题）、**✕**（收起）。
+- **语言**：默认跟随浏览器（中文 / English）；长按标题进设置，可切换「自动 / 中文 / English」。
 - **长按标题 0.7 秒**（电脑上右键）打开设置：改 API 地址 / Key / 模型，或给这个网站做「标定」。
 - 抓不到题时，底部是：**重新提取**、**读剪贴板**、**标定**。
   - 剪贴板是两步：① 先粘题目 → 下一步 ② 再粘选项 → 出答案。选项 `A/B/C/D` 和 `1/2/3/4` 都认，每行一个最稳。
@@ -112,7 +115,7 @@ A tiny floating card that answers multiple-choice questions on web pages. Essay 
 - 目前**不支持图片/视觉模型**，纯文本模型就够。
 - 能否浏览器直连取决于厂商的 **CORS**。报 `Load failed` / `Failed to fetch` 时，换允许直连的端点或自建代理；Ollama 需要设置 `OLLAMA_ORIGINS=*`。
 - Azure OpenAI、Gemini 原生、Claude 原生等**不是 OpenAI 兼容格式**，不能直接填，需要兼容层/网关。
-- 卡片界面和 C 模式解析目前是中文；A 模式输出固定英文。
+- 卡片界面默认跟随浏览器语言（中文 / English），可在设置里切换；C 模式解析会跟着界面语言，A 模式输出固定英文。
 
 ## 识别策略
 
@@ -183,6 +186,7 @@ quiz-coach/
 │   └── quiz-coach.user.js    # 生成物，装到 iPad 的就是这个
 ├── tools/
 │   ├── preview.html          # 本地预览页
+│   ├── preview-en.html       # 英文预览页
 │   ├── userscript-test.html  # 用户脚本测试页
 │   ├── formats-test.html     # 选项格式测试页
 │   ├── mock_api.py           # 本地假模型

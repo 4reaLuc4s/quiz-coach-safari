@@ -13,6 +13,12 @@ ANSWER = {
     "explain": "首包只置 SYN，二包才 SYN+ACK。",
 }
 
+ANSWER_EN = {
+    "answer": "B",
+    "confidence": 0.94,
+    "explain": "Only the first packet sets SYN; ACK appears in the second.",
+}
+
 ESSAY = """First, the handshake is really about what each side knows. The first SYN tells the server the client can send. The SYN+ACK tells the client the server can receive and send. But the server still doesn't know if the client got that reply, which is exactly why the third ACK exists.
 
 Second, with only two handshakes the server would assume the connection is ready right after sending SYN+ACK. If that packet gets lost, the server keeps a connection the client never knows about. Old, delayed SYNs could also make it accept a stale request and leave a half-dead entry in its queue.
@@ -43,9 +49,13 @@ class H(BaseHTTPRequestHandler):
         except Exception as e:
             print("[req] unparsed:", e)
 
-        if "论述题答案" in prompt:
+        is_essay = ("论述题答案" in prompt) or ("ready-to-submit essay answer" in prompt) or ("This English essay answer" in prompt)
+        if is_essay:
             content = ESSAY
             print("[req] -> essay")
+        elif "Answer the following multiple-choice question" in prompt:
+            content = json.dumps(ANSWER_EN, ensure_ascii=False)
+            print("[req] -> choice (en)")
         else:
             content = json.dumps(ANSWER, ensure_ascii=False)
             print("[req] -> choice")

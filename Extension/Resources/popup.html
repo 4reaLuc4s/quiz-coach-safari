@@ -22,6 +22,10 @@
     -webkit-appearance: none;
   }
   input:focus { outline: 1px solid #999999; border-color: #999999; }
+  select { width: 100%; padding: 6px 8px; border-radius: 6px;
+    border: 1px solid #e2e2e2; background: #ffffff; color: #222222;
+    font-size: 11px; font-family: inherit; }
+  select:focus { outline: 1px solid #999999; border-color: #999999; }
   .row { display: flex; gap: 6px; align-items: center; }
   .btn {
     flex: 1; padding: 7px; border-radius: 7px; border: 1px solid #e0e0e0;
@@ -41,32 +45,39 @@
 </head>
 <body>
   <h1>Quiz Coach</h1>
-  <div class="sub">点开就出答案 · 学习辅助</div>
+  <div class="sub" data-i18n="sub">点开就出答案 · 学习辅助</div>
 
-  <label>API 地址（OpenAI 兼容）</label>
+  <label data-i18n="language">语言</label>
+  <select id="lang">
+    <option value="auto" data-i18n="langAuto">自动（跟随浏览器）</option>
+    <option value="zh" data-i18n="langZh">中文</option>
+    <option value="en" data-i18n="langEn">English</option>
+  </select>
+
+  <label data-i18n="apiBase">API 地址（OpenAI 兼容）</label>
   <input type="text" id="apiBase" spellcheck="false" placeholder="https://api.deepseek.com/v1/chat/completions">
 
-  <label>API Key</label>
+  <label data-i18n="apiKey">API Key</label>
   <input type="password" id="apiKey" spellcheck="false" autocomplete="off" placeholder="sk-...">
 
-  <label>模型</label>
+  <label data-i18n="model">模型</label>
   <input type="text" id="model" spellcheck="false" placeholder="deepseek-chat">
 
   <div class="row" style="margin-top:12px">
-    <button class="btn" id="test">测试连接</button>
-    <button class="btn pri" id="save">保存</button>
+    <button class="btn" id="test" data-i18n="test">测试连接</button>
+    <button class="btn pri" id="save" data-i18n="save">保存</button>
   </div>
   <div class="msg" id="msg"></div>
 
   <div class="stat">
-    <div>已答 <b id="total">0</b></div>
+    <div><span data-i18n="answered">已答</span> <b id="total">0</b></div>
   </div>
 
   <div class="row" style="margin-top:10px">
-    <button class="btn" id="clear">清空标定</button>
+    <button class="btn" id="clear" data-i18n="clear">清空标定</button>
   </div>
 
-  <div class="hint">
+  <div class="hint" id="hint">
     默认走 DeepSeek，可以直接从浏览器请求。<br>
     换别家时填各自的 <code>/v1/chat/completions</code> 端点。<br>
     Key 只存在本机，不会上传到任何中转。<br>

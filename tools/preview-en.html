@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Practice page · Quiz Coach preview</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 28px 20px 120px;
+    background: #f4f6fa; color: #1f2330;
+    font: 15px/1.7 -apple-system, "SF Pro Text", "PingFang SC", "Microsoft YaHei", sans-serif;
+  }
+  .paper { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 20px; margin: 0 0 6px; }
+  .meta { color: #6b7280; font-size: 13px; margin-bottom: 22px; }
+  .card {
+    background: #fff; border-radius: 14px; padding: 20px 22px;
+    box-shadow: 0 2px 12px rgba(20,30,60,.06); margin-bottom: 16px;
+  }
+  .stem { font-size: 15.5px; font-weight: 600; margin-bottom: 14px; }
+  ul.opts { list-style: none; margin: 0; padding: 0; }
+  ul.opts li {
+    padding: 9px 12px; border-radius: 9px; margin-bottom: 7px;
+    border: 1px solid #e6e9f0; cursor: pointer;
+  }
+  ul.opts li:hover { background: #f7f9fc; }
+  .optgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .optgrid .o { padding: 10px 12px; border: 1px solid #e6e9f0; border-radius: 9px; }
+</style>
+</head>
+<body>
+<div class="paper">
+  <h1>Chapter 3 · Computer Networks (practice)</h1>
+  <div class="meta">3 questions · demo page for Quiz Coach</div>
+
+  <!-- Form A: ul > li -->
+  <div class="card">
+    <div class="stem">Question 1　In the TCP three-way handshake, which flag is set in the first segment sent by the client?</div>
+    <ul class="opts">
+      <li>A. SYN=1, ACK=0</li>
+      <li>B. SYN=1, ACK=1</li>
+      <li>C. SYN=0, ACK=1</li>
+      <li>D. FIN=1, ACK=0</li>
+    </ul>
+  </div>
+
+  <!-- Form B: grid + nested span -->
+  <div class="card">
+    <div class="stem">Question 2　Which HTTP status code means the requested resource has moved permanently?</div>
+    <div class="optgrid">
+      <div class="o"><span><b>A.</b></span> <span>301 Moved Permanently</span></div>
+      <div class="o"><span><b>B.</b></span> <span>302 Found</span></div>
+      <div class="o"><span><b>C.</b></span> <span>304 Not Modified</span></div>
+      <div class="o"><span><b>D.</b></span> <span>404 Not Found</span></div>
+    </div>
+  </div>
+
+  <!-- Form C: paragraph-style -->
+  <div class="card">
+    <p><strong>Question 3</strong>　How many bits are in an IPv4 address?</p>
+    <p>A、32 bits</p>
+    <p>B、64 bits</p>
+    <p>C、128 bits</p>
+    <p>D、256 bits</p>
+  </div>
+</div>
+
+<script src="../Extension/Resources/content.js"></script>
+</body>
+</html>
