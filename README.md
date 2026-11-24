@@ -2,13 +2,24 @@
 
 **中文** | [English](README.en.md)
 
-> 网页上的选择题，点开就出答案。一张半透明小卡片，Chrome / Edge 扩展和 iPad Safari 都能用。
+**一个 iPad / iPhone 优先的 Safari 答题辅助 —— an iPad-first alternative.**
 
-A tiny floating card that answers multiple-choice questions on web pages. Essay mode turns a pasted prompt into a concise English answer you can copy in one tap.
+> 网页上的选择题，点开就出答案。一张半透明小卡片：iPhone / iPad / Mac 的 Safari，以及 Chrome / Edge 都能用。
+
+A tiny floating card that answers multiple-choice questions on web pages. Built iPad-first; essay mode turns a pasted prompt into a concise English answer you can copy in one tap.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
+**平台**：iOS / iPadOS Safari（Userscripts，无需 Mac）· macOS Safari · Chrome / Edge
+
 > **定位**：自测、练习、核对答案的学习辅助工具。**请勿用于考试作弊**。本项目与任何考试平台无关。
+
+## 为什么是 iPad / iPhone 优先
+
+- **Safari 直接装**：用免费的 **Userscripts** 扩展，不需要 Mac、不需要 Apple 开发者账号，也没有 7 天签名过期。
+- **iPhone / iPad / Mac 通用**：同一份 `userscript/quiz-coach.user.js`，在这三种 Safari 里都能跑。
+- **原生扩展路线**：仓库同时包含 Safari Web Extension 资源，有 Mac 可以签名成原生扩展。
+- **无后端**：请求从页面直接发到你配置的 API 端点，没有中转。
 
 ## 截图
 
@@ -34,15 +45,15 @@ A tiny floating card that answers multiple-choice questions on web pages. Essay 
 
 ## 安装
 
-### 路线 A：iPad，不需要 Mac（推荐）
+### 路线 A：iPhone / iPad，不需要 Mac（推荐）
 
-原理：Safari 的「内容脚本」和「用户脚本」是同一件事。用 App Store 里免费的 **Userscripts** 扩展，就能在没有开发者签名的情况下把脚本跑在 iPad 的 Safari 里。零签名、零 7 天过期。
+原理：Safari 的「内容脚本」和「用户脚本」是同一件事。用 App Store 里免费的 **Userscripts** 扩展，就能在没有开发者签名的情况下把脚本跑在 iOS / iPadOS 的 Safari 里。零签名、零 7 天过期。
 
 1. 用记事本打开 `userscript/quiz-coach.user.js`，最上面的 `apiKey` 可以现在填；留空也行，之后在卡片设置里按网站填。
-2. 把文件传到 iPad（微信文件传输助手 / iCloud / 邮件都可以），存到「文件」。
+2. 把文件传到 iPhone / iPad（微信文件传输助手 / iCloud / 邮件都可以），存到「文件」。
 3. App Store 搜 **Userscripts**（作者 quoid，免费开源），打开后选一个文件夹作为「脚本目录」。
 4. 回到「文件」，把 `quiz-coach.user.js` 移进那个目录；再打开 Userscripts，确认开关是开的。
-5. iPad → 设置 → Safari → 扩展 → **Userscripts** → 打开 → **允许所有网站**。
+5. iPhone / iPad → 设置 → Safari → 扩展 → **Userscripts** → 打开 → **允许所有网站**。
 6. Safari 里打开任意网页 → 地址栏左侧 **aA** → **管理扩展** → 勾上 Userscripts。
 7. 页面右上角出现**半透明小灰点**，点开就是卡片。
 
@@ -57,15 +68,15 @@ A tiny floating card that answers multiple-choice questions on web pages. Essay 
 
 > 扩展会申请「读取和更改所有网站上的数据」，因为内容脚本需要在任意页面注入卡片；它只读页面文字，不上传页面内容。
 
-### 路线 C：iPad 原生 Safari 扩展（需要 Mac）
+### 路线 C：iPhone / iPad 原生 Safari 扩展（需要 Mac）
 
 想要「设置面板在 Safari 工具栏里、用原生扩展安装」的体验，就走 Xcode 签名。没有 Mac 可以跳过。
 
 1. Xcode → File → New → Project… → 搜 `Safari` → **Safari Extension App** → Product Name `QuizCoach`。
 2. 把 `Extension/Resources/` 里的文件覆盖进 `QuizCoach Extension/Resources/`。
 3. Signing & Capabilities → Team 选自己的 Apple ID → Bundle ID 改成唯一的。
-4. iPad 连线 → 选为运行目标 → **⌘R**；提示开发者模式就去 设置 → 隐私与安全性 → 开发者模式。
-5. iPad 设置 → Safari → 扩展 → QuizCoach → 打开 → 允许所有网站。
+4. iPhone / iPad 连线 → 选为运行目标 → **⌘R**；提示开发者模式就去 设置 → 隐私与安全性 → 开发者模式。
+5. iPhone / iPad 设置 → Safari → 扩展 → QuizCoach → 打开 → 允许所有网站。
 6. Safari → aA → 管理扩展 → 勾上 QuizCoach。
 
 > 免费 Apple ID 的签名 7 天过期，到期要连回 Mac 按一次 ⌘R。
@@ -183,7 +194,7 @@ quiz-coach/
 │   ├── popup.html / popup.js
 │   └── icons/
 ├── userscript/
-│   └── quiz-coach.user.js    # 生成物，装到 iPad 的就是这个
+│   └── quiz-coach.user.js    # 生成物，装到 iPhone / iPad 的就是这个
 ├── tools/
 │   ├── preview.html          # 本地预览页
 │   ├── preview-en.html       # 英文预览页

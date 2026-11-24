@@ -2,11 +2,22 @@
 
 [中文](README.md) | **English**
 
-> A tiny semi-transparent card for web pages: open it and get the answer to a multiple-choice question. Works as a Chrome / Edge extension and on iPad Safari.
+**An iPad-first alternative** for answering quiz questions in Safari.
+
+> A tiny semi-transparent card for web pages: open it and get the answer to a multiple-choice question. Works in Safari on iPhone, iPad and Mac, and as a Chrome / Edge extension.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
+**Platforms**: iOS / iPadOS Safari (via Userscripts, no Mac needed) · macOS Safari · Chrome / Edge
+
 > **Purpose**: a study aid for self-testing, practice and checking answers. **Do not use it for exam cheating.** This project is not affiliated with any exam platform.
+
+## Why iPad-first?
+
+- **Install directly in Safari**: with the free **Userscripts** app you need no Mac, no Apple developer account and no 7-day signing expiry.
+- **One script for iPhone, iPad and Mac**: the same `userscript/quiz-coach.user.js` runs in Safari on all three.
+- **Native extension option**: the repo also contains Safari Web Extension resources for signing if you have a Mac.
+- **No backend**: requests go from the page directly to the API endpoint you configure.
 
 ## Screenshots
 
@@ -30,15 +41,15 @@
 
 ## Install
 
-### Route A: iPad without a Mac (recommended)
+### Route A: iPhone / iPad without a Mac (recommended)
 
-Safari content scripts and userscripts are the same thing. With the free **Userscripts** app you can run the script in Safari without an Apple developer signature.
+Safari content scripts and userscripts are the same thing. With the free **Userscripts** app you can run the script in Safari on iOS / iPadOS without an Apple developer signature.
 
 1. Open `userscript/quiz-coach.user.js` in a text editor and fill in `apiKey` at the top (you can also leave it empty and set it later in the card).
-2. Transfer the file to the iPad (Files app, iCloud, email, etc.).
+2. Transfer the file to your iPhone / iPad (Files app, iCloud, email, etc.).
 3. Install **Userscripts** from the App Store (by quoid, free and open source) and choose a folder as the script directory.
 4. Move `quiz-coach.user.js` into that folder and make sure the script is enabled in Userscripts.
-5. iPad → Settings → Safari → Extensions → **Userscripts** → enable → **Allow all websites**.
+5. iPhone / iPad → Settings → Safari → Extensions → **Userscripts** → enable → **Allow all websites**.
 6. In Safari, tap **aA** in the address bar → **Manage Extensions** → enable Userscripts.
 7. A small semi-transparent dot appears at the top-right of every page. Tap it to open the card.
 
@@ -53,15 +64,15 @@ Safari content scripts and userscripts are the same thing. With the free **Users
 
 > The extension asks for "read and change all your data on all websites" because the content script has to inject the card everywhere. It only reads page text and does not upload page content.
 
-### Route C: Native Safari extension on iPad (requires a Mac)
+### Route C: iPhone / iPad native Safari extension (requires a Mac)
 
 For a native extension installation with a toolbar-based settings panel, use Xcode signing.
 
 1. Xcode → File → New → Project… → search `Safari` → **Safari Extension App** → Product Name `QuizCoach`.
 2. Copy the files in `Extension/Resources/` into `QuizCoach Extension/Resources/`.
 3. Signing & Capabilities → choose your Apple ID as Team → make the Bundle ID unique.
-4. Connect the iPad, select it as the run target, press **⌘R**; enable Developer Mode if prompted.
-5. iPad → Settings → Safari → Extensions → QuizCoach → enable → Allow all websites.
+4. Connect the iPhone / iPad, select it as the run target, press **⌘R**; enable Developer Mode if prompted.
+5. iPhone / iPad → Settings → Safari → Extensions → QuizCoach → enable → Allow all websites.
 6. Safari → aA → Manage Extensions → enable QuizCoach.
 
 > Free Apple IDs expire after 7 days; reconnect to the Mac and press ⌘R to renew.
@@ -179,7 +190,7 @@ quiz-coach/
 │   ├── popup.html / popup.js
 │   └── icons/
 ├── userscript/
-│   └── quiz-coach.user.js    # generated; this is the iPad file
+│   └── quiz-coach.user.js    # generated; this is the iPhone / iPad file
 ├── tools/
 │   ├── preview.html          # local preview
 │   ├── preview-en.html       # English preview page
