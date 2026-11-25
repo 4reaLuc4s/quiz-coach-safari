@@ -19,7 +19,7 @@
   const HAS_EXT = !!(EXT && EXT.runtime && EXT.runtime.id);
   const IS_TOP = (() => { try { return window.top === window.self; } catch (e) { return false; } })();
   const HOST = location.hostname || 'local';
-  const VERSION = '1.2.0';
+  const VERSION = '1.3.0';
 
   /* --------------------------------------------------------------- 常量 */
   const BOOT_CFG = (() => {
@@ -31,6 +31,9 @@
     apiKey: '',
     model: 'deepseek-chat',
     lang: 'auto',
+    answerLang: 'auto',
+    theme: 'light',
+    opacity: 0.74,
     position: null
   }, BOOT_CFG);
 
@@ -55,6 +58,14 @@
       langAuto: '自动（跟随浏览器）',
       langZh: '中文',
       langEn: 'English',
+      settings: '设置',
+      theme: '卡片主题',
+      themeLight: '白色',
+      themeDark: '黑色',
+      opacity: '透明度',
+      answerLang: '答案语言',
+      answerLangAuto: '自动（默认）',
+      answerHint: '自动：C 模式解析跟随界面语言；A 模式论述题默认英文。',
       keyNote: 'Key 只存在这台设备的本地存储里。',
       calibrateSite: '标定这个网站的题目位置',
       cancel: '取消',
@@ -117,8 +128,6 @@
       chars: ' 字',
       words: ' 词',
       jsonOnly: '只输出 JSON。',
-      essaySystem: '你在帮同学写论述题作业，答案用英语。只输出答案正文。',
-      compressSystem: '你在压缩一段英语论述题答案。只输出压缩后的正文。',
       modelNoJSON: '模型没有返回 JSON',
       invalidAnswer: (a) => '模型返回的 answer 不是选项字母：' + a,
       emptyResponse: '模型返回为空'
@@ -137,6 +146,14 @@
       langAuto: 'Auto (follow browser)',
       langZh: '中文',
       langEn: 'English',
+      settings: 'Settings',
+      theme: 'Card theme',
+      themeLight: 'White',
+      themeDark: 'Black',
+      opacity: 'Opacity',
+      answerLang: 'Answer language',
+      answerLangAuto: 'Auto (default)',
+      answerHint: 'Auto: C-mode explanations follow the UI language; A-mode essays default to English.',
       keyNote: "The key is stored only in this device's local storage.",
       calibrateSite: 'Calibrate question position on this site',
       cancel: 'Cancel',
@@ -199,8 +216,6 @@
       chars: ' chars',
       words: ' words',
       jsonOnly: 'Output JSON only.',
-      essaySystem: 'You are helping a classmate write an essay answer. Output only the answer body, in English.',
-      compressSystem: 'You are compressing an English essay answer. Output only the compressed body.',
       modelNoJSON: 'The model did not return JSON',
       invalidAnswer: (a) => 'The model returned an invalid answer letter: ' + a,
       emptyResponse: 'The model returned an empty response'
@@ -723,7 +738,7 @@
   /* ----------------------------------------------------------------- LLM */
   function buildPrompt(q, options) {
     const optText = options.map((o) => o.key + '. ' + o.text).join('\n');
-    if (LANG === 'en') {
+    if (explainLang() === 'en') {
       return [
         'Answer the following multiple-choice question and give a one-line explanation.',
         '',
@@ -838,6 +853,19 @@
     LANG = detectLang(S.langPref);
   }
 
+  // 答案语言：auto = C 模式解析跟随界面、A 模式论述默认英文
+  function explainLang() {
+    const pref = S.settings.answerLang || 'auto';
+    if (pref === 'zh' || pref === 'en') return pref;
+    return LANG;
+  }
+
+  function essayLang() {
+    const pref = S.settings.answerLang || 'auto';
+    if (pref === 'zh' || pref === 'en') return pref;
+    return 'en';
+  }
+
   let hostEl = null, shadow = null, wrapEl = null, clickBound = false;
 
   const CSS = `
@@ -853,7 +881,7 @@
   .pill:active .dot { opacity: 1; }
   .wrap {
     position: fixed; width: 264px; max-width: calc(100vw - 16px);
-    background: rgba(255,255,255,.74); color: #777777;
+    background: rgba(255,255,255,var(--qc-alpha,.74)); color: #777777;
     -webkit-backdrop-filter: blur(10px) saturate(1.05);
     backdrop-filter: blur(10px) saturate(1.05);
     border: 1px solid rgba(0,0,0,.07); border-radius: 10px;
@@ -862,6 +890,7 @@
     font: 11px/1.45 -apple-system,"SF Pro Text","PingFang SC","Microsoft YaHei",sans-serif;
     user-select: none;
   }
+  .hgap { flex: 0 0 6px; width: 6px; }
   .hd {
     display: flex; align-items: center; gap: 4px; padding: 4px 6px;
     border-bottom: 1px solid #eeeeee;
@@ -943,6 +972,42 @@
     border-radius: 5px; font: 10px/1.45 -apple-system,"SF Pro Text",sans-serif; color: #777777;
     background: #ffffff; resize: none; -webkit-appearance: none; }
   #qc-paste:focus, #qc-essay:focus { outline: none; border-color: #999999; }
+  .ico.gear { font-size: 10px; }
+  .field input[type=range] { padding: 0; border: 0; background: transparent;
+    accent-color: #888888; height: 16px; }
+  .wrap.dark {
+    background: rgba(28,28,30,var(--qc-alpha,.74)); color: #d2d2d2;
+    border-color: rgba(255,255,255,.08); box-shadow: 0 3px 18px rgba(0,0,0,.35);
+  }
+  .wrap.dark .hd { border-bottom-color: rgba(255,255,255,.08); }
+  .wrap.dark .hd .t, .wrap.dark .hd .t small { color: #a8a8a8; }
+  .wrap.dark .ico { background: #2a2a2c; border-color: rgba(255,255,255,.12); color: #cfcfcf; }
+  .wrap.dark .ico:active { background: #3a3a3c; }
+  .wrap.dark .qtext, .wrap.dark .opt .x, .wrap.dark .ansx,
+  .wrap.dark .big, .wrap.dark .en, .wrap.dark .zh { color: #d0d0d0; }
+  .wrap.dark .opt { background: #262628; border-color: rgba(255,255,255,.08); }
+  .wrap.dark .opt:active { background: #303032; }
+  .wrap.dark .opt .k { background: #333335; color: #b8b8b8; }
+  .wrap.dark .tag { background: #333335; color: #b8b8b8; }
+  .wrap.dark .explain { background: rgba(255,255,255,.06); color: #c8c8c8; }
+  .wrap.dark .bar { border-top-color: rgba(255,255,255,.08); }
+  .wrap.dark .btn { background: #2a2a2c; border-color: rgba(255,255,255,.12); color: #d0d0d0; }
+  .wrap.dark .btn:active { background: #3a3a3c; }
+  .wrap.dark .btn.pri { border-color: rgba(255,255,255,.25); color: #f0f0f0; }
+  .wrap.dark .note, .wrap.dark .tip, .wrap.dark .mini, .wrap.dark .err { color: #b0b0b0; }
+  .wrap.dark .calbar { background: #242426; color: #b8b8b8; border-bottom-color: rgba(255,255,255,.08); }
+  .wrap.dark .field label { color: #b5b5b5; }
+  .wrap.dark .field input, .wrap.dark .field select,
+  .wrap.dark #qc-paste, .wrap.dark #qc-essay {
+    background: #242426; border-color: rgba(255,255,255,.12); color: #e0e0e0;
+  }
+  .wrap.dark .field input:focus, .wrap.dark .field select:focus,
+  .wrap.dark #qc-paste:focus, .wrap.dark #qc-essay:focus { border-color: rgba(255,255,255,.3); }
+  .wrap.dark .field input[type=range] { accent-color: #bbbbbb; }
+  .wrap.dark .done { color: #c8c8c8; }
+  .wrap.dark .done small { color: #9a9a9a; }
+  .wrap.dark .spin { border-color: rgba(255,255,255,.15); border-top-color: #bbbbbb; }
+  .wrap.dark #qc-paste::placeholder, .wrap.dark #qc-essay::placeholder { color: #888888; }
   `;
 
   function ensureHost() {
@@ -990,7 +1055,8 @@
 
     shadow.innerHTML =
       '<style>' + CSS + '</style>' +
-      '<div class="wrap" style="' + posStyle + '">' +
+      '<div class="wrap' + (S.settings.theme === 'dark' ? ' dark' : '') + '" style="' + posStyle +
+      '--qc-alpha:' + Math.min(1, Math.max(0.3, Number(S.settings.opacity) || 0.74)) + ';">' +
       header() + body() + footer() +
       '</div>';
     bind();
@@ -1002,6 +1068,8 @@
     const modeTip = S.mode === 'A' ? t('modeTipA') : t('modeTipC');
     return '<div class="hd" data-drag="1">' +
       '<div class="t" id="qc-title">' + title + '</div>' +
+      '<button class="ico gear" data-act="settings" title="' + esc(t('settings')) + '">&#x2699;&#xFE0E;</button>' +
+      '<span class="hgap"></span>' +
       '<button class="ico" data-act="toggle-mode" title="' + esc(modeTip) + '">' +
       (S.mode === 'A' ? 'A' : 'C') + '</button>' +
       '<button class="ico" data-act="refresh" title="' + esc(t('refresh')) + '">&#x21bb;</button>' +
@@ -1015,6 +1083,9 @@
     if (S.phase === 'settings') {
       const st = S.settings || {};
       const langPref = S.langPref || 'auto';
+      const theme = st.theme === 'dark' ? 'dark' : 'light';
+      const alpha = Math.min(1, Math.max(0.3, Number(st.opacity) || 0.74));
+      const answerPref = st.answerLang || 'auto';
       return '<div class="bd">' +
         '<div class="field"><label>' + esc(t('language')) + '</label>' +
         '<select id="qc-lang">' +
@@ -1022,6 +1093,22 @@
         '<option value="zh"' + (langPref === 'zh' ? ' selected' : '') + '>' + esc(t('langZh')) + '</option>' +
         '<option value="en"' + (langPref === 'en' ? ' selected' : '') + '>' + esc(t('langEn')) + '</option>' +
         '</select></div>' +
+        '<div class="field"><label>' + esc(t('answerLang')) + '</label>' +
+        '<select id="qc-answer-lang">' +
+        '<option value="auto"' + (answerPref === 'auto' ? ' selected' : '') + '>' + esc(t('answerLangAuto')) + '</option>' +
+        '<option value="zh"' + (answerPref === 'zh' ? ' selected' : '') + '>' + esc(t('langZh')) + '</option>' +
+        '<option value="en"' + (answerPref === 'en' ? ' selected' : '') + '>' + esc(t('langEn')) + '</option>' +
+        '</select>' +
+        '<div class="note" style="margin-top:3px">' + esc(t('answerHint')) + '</div></div>' +
+        '<div class="field"><label>' + esc(t('theme')) + '</label>' +
+        '<select id="qc-theme">' +
+        '<option value="light"' + (theme === 'light' ? ' selected' : '') + '>' + esc(t('themeLight')) + '</option>' +
+        '<option value="dark"' + (theme === 'dark' ? ' selected' : '') + '>' + esc(t('themeDark')) + '</option>' +
+        '</select></div>' +
+        '<div class="field"><label>' + esc(t('opacity')) +
+        ' <span id="qc-opacity-val" style="float:right;font-weight:400">' +
+        Math.round(alpha * 100) + '%</span></label>' +
+        '<input id="qc-opacity" type="range" min="30" max="100" step="1" value="' + Math.round(alpha * 100) + '"></div>' +
         '<div class="field"><label>' + esc(t('apiBase')) + '</label>' +
         '<input id="qc-api-base" type="text" spellcheck="false" value="' + esc(st.apiBase || '') + '" placeholder="https://api.deepseek.com/v1/chat/completions"></div>' +
         '<div class="field"><label>' + esc(t('apiKey')) + '</label>' +
@@ -1120,8 +1207,8 @@
   function essaySize(s) {
     const txt = String(s || '').trim();
     if (!txt) return '';
-    if (/[\u4e00-\u9fff]/.test(txt)) return txt.replace(/\s+/g, '').length + t('chars');
-    return txt.split(/\s+/).filter(Boolean).length + t('words');
+    const lang = essayLang();
+    return countEssayUnits(txt, lang) + (lang === 'zh' ? t('chars') : t('words'));
   }
 
   function essayBody() {
@@ -1266,6 +1353,15 @@
       });
     }
 
+    // 设置里的透明度滑块：拖动时实时更新百分比
+    const op = shadow.getElementById('qc-opacity');
+    if (op) {
+      op.addEventListener('input', () => {
+        const v = shadow.getElementById('qc-opacity-val');
+        if (v) v.textContent = op.value + '%';
+      });
+    }
+
     // 点击委托只绑一次（render 会反复调用 bind）
     if (!clickBound) {
       clickBound = true;
@@ -1359,11 +1455,17 @@
           const el = shadow.getElementById(id);
           return el ? String(el.value || '').trim() : '';
         };
+        const rawOpacity = Number(val('qc-opacity'));
         const next = Object.assign({}, S.settings, {
           apiBase: val('qc-api-base') || DEFAULT_SETTINGS.apiBase,
           apiKey: val('qc-api-key'),
           model: val('qc-model') || DEFAULT_SETTINGS.model,
-          lang: val('qc-lang') || 'auto'
+          lang: val('qc-lang') || 'auto',
+          answerLang: val('qc-answer-lang') || 'auto',
+          theme: val('qc-theme') === 'dark' ? 'dark' : 'light',
+          opacity: isFinite(rawOpacity) && rawOpacity > 0
+            ? Math.min(1, Math.max(0.3, rawOpacity / 100))
+            : 0.74
         });
         saveSettings(next);
         break;
@@ -1467,34 +1569,33 @@
   }
 
   function buildEssayPrompt(q) {
-    if (LANG === 'en') {
+    if (essayLang() === 'zh') {
       return [
-        '[Prompt]',
+        '【题目】',
         String(q || '').trim(),
         '',
-        'Write a ready-to-submit essay answer that follows these rules:',
-        '1. Write in English only. Answer in English even if the prompt is in Chinese.',
-        '2. Output the answer body only. No "Answer:" prefix, no Markdown fences, no headings; use natural "First / Second / Third" phrasing for points.',
-        '3. Strictly at most 150 words. If you go over, rephrase or merge points; do not cut a sentence in half, and the final sentence must be complete. Use as many points as the question needs — not a fixed number. One point per paragraph, with a blank line between paragraphs.',
-        '4. You are an ordinary college student: you have basic knowledge, but the logic does not need to be airtight; be a little colloquial, give one or two ordinary examples, occasionally repeat or wander a bit.',
-        '5. Do not sound too professional: avoid stacking jargon, avoid a rigid template, and do not end with a grand slogan.',
-        '6. Allow small imperfections (an ordinary example, a slightly jumpy paragraph) so it reads like a person wrote it.',
-        '7. Do not mention these instructions or explain how you wrote it.'
+        '请按下面的要求，写一份可以直接交上去的论述题答案：',
+        '1. 答案必须用中文写，不要用英文。',
+        '2. 只输出答案正文。不要「答案：」「解析：」这类前缀，不要 Markdown 代码块、不要小标题；用「第一、第二、第三」这样的自然说法分点。',
+        '3. 整篇严格控制在 150 字以内，最多 150 字，一个字都不能超；如果写超了，就换更简洁的说法或合并观点，不能删掉半句话，最后一句必须是完整的句子。分几点、每点写多长按题目需要自己定，不固定；每点一段，段与段之间空一行。',
+        '4. 你是一个普通大学生：有基本的知识储备，但逻辑别写得太严密，论证别一环扣一环；可以口语一点，举一两个普通的例子，偶尔重复或绕一下前面的意思。',
+        '5. 别显得太专业：少堆术语，每点也写得自然一点，别在结尾升华、喊口号。',
+        '6. 允许一点点小瑕疵（例子普通、某段稍微跳一下），整体要像人写的，读得过去。',
+        '7. 不要提及这些要求，不要解释你是怎么写的。'
       ].join('\n');
     }
     return [
-      '【题目】',
+      '[Prompt]',
       String(q || '').trim(),
       '',
-      '请按下面的要求，写一份可以直接交上去的论述题答案：',
-      '1. 答案必须用英语写（English）。题目是中文也照样用英语回答。',
-      '2. 只输出答案正文。不要「Answer:」「答案：」这类前缀，不要 Markdown 代码块、不要小标题；用 First / Second / Third 这样的自然说法分点。',
-      '3. 整篇严格控制在 150 words 以内，最多 150 words，一个词都不能超；如果写超了，就换更简洁的说法或合并观点，不能删掉半句话，最后一句必须是完整的句子。分几点、每点写多长按题目需要自己定，不固定；每点一段，段与段之间空一行。',
-      '4. 你是一个普通大学生：有基本的知识储备，但逻辑别写得太严密，论证别一环扣一环；' +
-        '可以口语一点，举一两个普通的例子，偶尔重复或绕一下前面的意思。',
-      '5. 别显得太专业：少堆术语，每点也写得自然一点，别在结尾升华、喊口号。',
-      '6. 允许一点点小瑕疵（例子普通、某段稍微跳一下），整体要像人写的，读得过去。',
-      '7. 不要提及这些要求，不要解释你是怎么写的。'
+      'Write a ready-to-submit essay answer that follows these rules:',
+      '1. Write in English only. Answer in English even if the prompt is in Chinese.',
+      '2. Output the answer body only. No "Answer:" prefix, no Markdown fences, no headings; use natural "First / Second / Third" phrasing for points.',
+      '3. Strictly at most 150 words. If you go over, rephrase or merge points; do not cut a sentence in half, and the final sentence must be complete. Use as many points as the question needs — not a fixed number. One point per paragraph, with a blank line between paragraphs.',
+      '4. You are an ordinary college student: you have basic knowledge, but the logic does not need to be airtight; be a little colloquial, give one or two ordinary examples, occasionally repeat or wander a bit.',
+      '5. Do not sound too professional: avoid stacking jargon, avoid a rigid template, and do not end with a grand slogan.',
+      '6. Allow small imperfections (an ordinary example, a slightly jumpy paragraph) so it reads like a person wrote it.',
+      '7. Do not mention these instructions or explain how you wrote it.'
     ].join('\n');
   }
 
@@ -1509,48 +1610,68 @@
     return String(s || '').split(/\s+/).filter(Boolean).length;
   }
 
-  // 超过 150 词时：先让模型换说法/合并观点重写；实在压不下来才按完整句子取舍，绝不截半句
+  function countEssayUnits(s, lang) {
+    if (lang === 'zh') {
+      const cjk = (String(s || '').match(/[\u4e00-\u9fff]/g) || []).length;
+      return cjk || countWords(s);
+    }
+    return countWords(s);
+  }
+
+  const ESSAY_SYSTEM = {
+    zh: '你在帮同学写论述题作业，答案用中文。只输出答案正文。',
+    en: 'You are helping a classmate write an essay answer. Output only the answer body, in English.'
+  };
+
+  const COMPRESS_SYSTEM = {
+    zh: '你在压缩一段中文论述题答案。只输出压缩后的正文。',
+    en: 'You are compressing an English essay answer. Output only the compressed body.'
+  };
+
+  // 超过 150 单位时：先让模型换说法/合并观点重写；实在压不下来才按完整句子取舍，绝不截半句
   function buildCompressPrompt(text, max, attempt) {
-    if (LANG === 'en') {
+    const lang = essayLang();
+    if (lang === 'zh') {
       const lines = [
-        'This English essay answer currently has ' + countWords(text) + ' words, over the ' + max + '-word limit.',
-        'Rewrite it more concisely — change the wording and merge similar points — so that it is within ' + max + ' words without losing the main ideas.',
+        '下面这段中文论述题答案现在有 ' + countEssayUnits(text, 'zh') + ' 字，超过了 ' + max + ' 字的上限。',
+        '请在不丢掉主要观点的前提下，换更简洁的说法、合并相近的观点，把它压缩到 ' + max + ' 字以内。',
         '',
-        'Requirements:',
-        '1. Keep it in English, in an ordinary college-student voice; the logic does not need to be airtight and it should not sound too professional.',
-        '2. Every sentence must be complete, including the final one; no ellipsis and no half sentence.',
-        '3. Output only the compressed answer body. No explanation, no "Answer:" prefix, no Markdown.'
+        '要求：',
+        '1. 仍然是中文，普通大学生口吻，逻辑不用太严密，别写得太专业。',
+        '2. 每个句子都必须是完整的句子，结尾最后一句也要完整；不要用省略号，不要把句子写一半。',
+        '3. 只输出压缩后的答案正文，不要解释，不要「答案：」前缀，不要 Markdown。'
       ];
       if (attempt > 1) {
-        lines.push('4. Note: the previous compression was still over the limit. This time it must be shorter, and the ending must still be a complete sentence.');
+        lines.push('4. 注意：上一次压缩后仍然超过上限，这次必须写得更短，但结尾仍要是完整句子。');
       }
-      lines.push('', '[Original]', text);
+      lines.push('', '【原文】', text);
       return lines.join('\n');
     }
     const lines = [
-      '下面这段英语论述题答案现在有 ' + countWords(text) + ' words，超过了 ' + max + ' words 的上限。',
-      '请在不丢掉主要观点的前提下，换更简洁的说法、合并相近的观点，把它压缩到 ' + max + ' words 以内。',
+      'This English essay answer currently has ' + countEssayUnits(text, 'en') + ' words, over the ' + max + '-word limit.',
+      'Rewrite it more concisely — change the wording and merge similar points — so that it is within ' + max + ' words without losing the main ideas.',
       '',
-      '要求：',
-      '1. 仍然是英语，普通大学生口吻，逻辑不用太严密，别写得太专业。',
-      '2. 每个句子都必须是完整的句子，结尾最后一句也要完整；不要用省略号，不要把句子写一半。',
-      '3. 只输出压缩后的答案正文，不要解释，不要「Answer:」前缀，不要 Markdown。'
+      'Requirements:',
+      '1. Keep it in English, in an ordinary college-student voice; the logic does not need to be airtight and it should not sound too professional.',
+      '2. Every sentence must be complete, including the final one; no ellipsis and no half sentence.',
+      '3. Output only the compressed answer body. No explanation, no "Answer:" prefix, no Markdown.'
     ];
     if (attempt > 1) {
-      lines.push('4. 注意：上一次压缩后仍然超过上限，这次必须写得更短，但结尾仍要是完整句子。');
+      lines.push('4. Note: the previous compression was still over the limit. This time it must be shorter, and the ending must still be a complete sentence.');
     }
-    lines.push('', '【原文】', text);
+    lines.push('', '[Original]', text);
     return lines.join('\n');
   }
 
   function cutToCompleteSentences(text, max) {
+    const lang = essayLang();
     const s = String(text || '').trim();
-    if (countWords(s) <= max) return s;
-    const sentences = s.match(/[^.!?]+[.!?]+["')\]]*\s*/g) || [];
+    if (countEssayUnits(s, lang) <= max) return s;
+    const sentences = s.match(/[^.!?。！？]+[.!?。！？]+["')\]]*\s*/g) || [];
     let out = '';
     let count = 0;
     for (const sentence of sentences) {
-      const n = countWords(sentence);
+      const n = countEssayUnits(sentence, lang);
       if (!n) continue;
       if (count + n > max) break;
       out += sentence;
@@ -1561,30 +1682,34 @@
   }
 
   function ensureEndPunct(s) {
-    const t = String(s || '').trim();
-    if (!t) return t;
-    return /[.!?…]["')\]]?$/.test(t) ? t : t + '.';
+    const txt = String(s || '').trim();
+    if (!txt) return txt;
+    if (essayLang() === 'zh') {
+      return /[。！？…]["')\]]?$/.test(txt) ? txt : txt + '。';
+    }
+    return /[.!?…]["')\]]?$/.test(txt) ? txt : txt + '.';
   }
 
   async function ensureEssayLimit(settings, text, max) {
+    const lang = essayLang();
     let draft = text;
-    for (let i = 0; i < 2 && countWords(draft) > max; i++) {
+    for (let i = 0; i < 2 && countEssayUnits(draft, lang) > max; i++) {
       try {
         const raw = await postChat(
           settings,
-          t('compressSystem'),
+          COMPRESS_SYSTEM[lang],
           buildCompressPrompt(draft, max, i + 1),
           0.5
         );
         const next = parseEssayText(raw);
         if (!next) break;
-        if (countWords(next) < countWords(draft)) draft = next;
+        if (countEssayUnits(next, lang) < countEssayUnits(draft, lang)) draft = next;
         else if (i === 1) break;
       } catch (e) {
         break;
       }
     }
-    return ensureEndPunct(countWords(draft) <= max ? draft : cutToCompleteSentences(draft, max));
+    return ensureEndPunct(countEssayUnits(draft, lang) <= max ? draft : cutToCompleteSentences(draft, max));
   }
 
   async function postChat(settings, system, prompt, temperature) {
@@ -1616,7 +1741,7 @@
     if (!settings.apiKey) throw new Error('NO_KEY');
     const raw = await postChat(
       settings,
-      t('essaySystem'),
+      ESSAY_SYSTEM[essayLang()],
       buildEssayPrompt(q),
       0.9
     );

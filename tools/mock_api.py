@@ -25,6 +25,12 @@ Second, with only two handshakes the server would assume the connection is ready
 
 Third, the extra message is mostly about mutual confirmation. It doesn't make the network reliable, but it lets both sides agree on the same state before data starts flowing. Two messages would leave one side guessing, and guessing is kind of what causes weird bugs later."""
 
+ESSAY_ZH = """第一，三次握手确认双方能收能发。客户端发 SYN，服务端知道客户端能发；服务端回 SYN+ACK，客户端知道服务端能收发。服务端不知道客户端收没收到，所以要第三次 ACK。
+
+第二，只有两次的话，服务端发完 SYN+ACK 就认为连接建好了。包丢了会维护一个客户端不知道的连接，旧的延迟 SYN 也可能被当成新请求。
+
+第三，多这一次主要是双向确认，让两端在传数据前对状态达成一致，少一次总有一方在猜。"""
+
 
 class H(BaseHTTPRequestHandler):
     def _cors(self):
@@ -49,10 +55,12 @@ class H(BaseHTTPRequestHandler):
         except Exception as e:
             print("[req] unparsed:", e)
 
-        is_essay = ("论述题答案" in prompt) or ("ready-to-submit essay answer" in prompt) or ("This English essay answer" in prompt)
-        if is_essay:
+        if ("答案必须用中文写" in prompt) or ("中文论述题答案" in prompt):
+            content = ESSAY_ZH
+            print("[req] -> essay (zh)")
+        elif ("论述题答案" in prompt) or ("ready-to-submit essay answer" in prompt) or ("This English essay answer" in prompt):
             content = ESSAY
-            print("[req] -> essay")
+            print("[req] -> essay (en)")
         elif "Answer the following multiple-choice question" in prompt:
             content = json.dumps(ANSWER_EN, ensure_ascii=False)
             print("[req] -> choice (en)")

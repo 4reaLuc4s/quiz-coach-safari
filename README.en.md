@@ -18,7 +18,7 @@
 
 Open [Releases](https://github.com/4reaLuc4s/quiz-coach-safari/releases/latest) and download:
 
-- `quiz-coach-safari-1.2.0.zip` — full package with the extension, userscript, tools and screenshots
+- `quiz-coach-safari-1.3.0.zip` — full package with the extension, userscript, tools and screenshots
 - `quiz-coach.user.js` — standalone userscript for iPhone / iPad
 
 **Option 2: Code → Download ZIP**
@@ -47,7 +47,7 @@ git clone https://github.com/4reaLuc4s/quiz-coach-safari.git
 
 ![Multiple-choice mode](docs/preview-en.jpg)
 
-**A · Essay mode** — paste a prompt, get an English answer under 150 words, copy it in one tap.
+**A · Essay mode** — paste a prompt, get an answer under 150 words (or 150 Chinese characters), copy it in one tap.
 
 ![Essay mode](docs/essay-mode-en.jpg)
 
@@ -56,7 +56,7 @@ git clone https://github.com/4reaLuc4s/quiz-coach-safari.git
 ## Features
 
 - **C · Multiple-choice mode**: reads the current page's question and options, then shows the answer (original option label + option text + a short explanation) after you open the dot at the top-right. Use **↻** to cycle through multiple questions on one page.
-- **A · Essay mode**: no page reading, paste only. Copy the prompt → click **一键粘贴** (paste) → get an English essay answer; the number of points depends on the question, the answer is hard-capped at 150 words, and over-long drafts are rewritten/compressed with a complete final sentence → click **复制** (copy).
+- **A · Essay mode**: no page reading, paste only. Copy the prompt → click **一键粘贴** (paste) → get an essay answer (English by default; switch to Chinese in settings) hard-capped at 150 words for English or 150 characters for Chinese; over-long drafts are rewritten/compressed with a complete final sentence → click **复制** (copy).
 - **Fallbacks**: two-step clipboard (question, then options) or one-time per-site calibration when automatic detection fails.
 - **Low footprint**: frosted semi-transparent card; collapses to a small grey dot; draggable and remembers its position.
 - **No relay**: requests go from the page directly to the API endpoint you configure.
@@ -102,13 +102,25 @@ For a native extension installation with a toolbar-based settings panel, use Xco
 ## Usage
 
 - Tap the grey dot at the top-right to get the answer (usually 1–3 seconds).
-- The card header has three small round buttons: **A / C** (toggle mode), **↻** (refresh / next question), **✕** (collapse).
-- **Language**: follows the browser by default (Chinese / English); long-press the title and switch between Auto / 中文 / English in settings.
-- **Long-press the title for 0.7 s** (right-click on desktop) to open settings: endpoint / key / model, or calibrate the current site.
+- The card header has four small round buttons: **⚙ Settings**, **A / C** (toggle mode), **↻** (refresh / next question), **✕** (collapse). There is a deliberate gap between ⚙ and A/C to avoid mistaps.
+- **Language**: follows the browser by default (Chinese / English); switch between Auto / 中文 / English in settings.
+- **Tap ⚙ or long-press the title for 0.7 s** (right-click on desktop) to open settings: card language, answer language, theme, opacity, API endpoint / key / model, or calibrate the current site.
 - When detection fails, the footer shows **重新提取** (re-extract), **读剪贴板** (read clipboard), **标定** (calibrate).
   - Clipboard is two steps: paste the question, then the options. `A/B/C/D` and `1/2/3/4` are both accepted; one option per line works best.
 - At the bottom of an answer there are two tiny text buttons: **认错了？标定** (wrong question? calibrate) and **粘贴** (paste).
-- In A mode, after generation the card only shows "答案已生成 · 约 N 词 / 点「复制」直接拿走"; the card size does not change.
+- In A mode, after generation the card only shows "答案已生成 · 约 N 词 / 约 N 字 / 点「复制」直接拿走"; the card size does not change.
+
+## Settings
+
+Tap the **⚙** button at the top of the card (or long-press the title for 0.7 s):
+
+- **Card language**: Auto / 中文 / English
+- **Answer language**: Auto / 中文 / English. Auto: C-mode explanations follow the UI language; A-mode essays default to English
+- **Theme**: White / Black
+- **Opacity**: 30%–100% (card background only)
+- **API endpoint / key / model**, plus per-site calibration
+
+![Settings](docs/settings-en.jpg)
 
 ## Models
 
@@ -123,7 +135,7 @@ The defaults in the code are:
 Where to change:
 
 - **Extension**: toolbar icon → fill endpoint / key / model → Save.
-- **Userscript**: long-press the card title for 0.7 s (right-click on desktop) → Settings; or edit `__QUIZ_COACH_CONFIG__` at the top of `quiz-coach.user.js`.
+- **Userscript**: tap the card’s ⚙ or long-press the title for 0.7 s (right-click on desktop) → Settings; or edit `__QUIZ_COACH_CONFIG__` at the top of `quiz-coach.user.js`.
 
 Switching models is supported as long as the provider offers an **OpenAI-compatible** `POST /v1/chat/completions` (`Authorization: Bearer <key>`; same request and response shape). Examples (model names are examples only — check the provider's dashboard):
 
@@ -144,7 +156,7 @@ Notes:
 - **No image/vision support** yet; a text-only model is enough.
 - Direct browser requests depend on the provider's **CORS** policy. If you see `Load failed` / `Failed to fetch`, use a CORS-enabled endpoint or your own proxy. Ollama needs `OLLAMA_ORIGINS=*`.
 - Native non-OpenAI APIs (Azure OpenAI, Gemini native, Claude native, etc.) are not compatible; use a compatibility layer or gateway.
-- The card UI follows the browser language by default (Chinese / English) and can be switched in settings. C-mode explanations follow the UI language; A-mode output is always English.
+- The card UI follows the browser language by default (Chinese / English) and can be switched in settings. C-mode explanations and A-mode essays follow the **answer language** setting (Auto: explanations follow the UI; essays default to English).
 
 ## How questions are detected
 
@@ -173,7 +185,7 @@ This project is for self-testing, practice, checking answers and study assistanc
 - It only reads DOM text. Questions drawn entirely on a canvas are not readable (use the clipboard).
 - The card is an in-page element and **will appear in screen recordings**.
 - In userscript mode, settings are stored per site by default; in extension mode they are global.
-- A mode always outputs English and is capped at 150 words; in the rare case two compression attempts still exceed the limit, it trims at whole-sentence boundaries.
+- A mode defaults to English (Chinese can be selected) and is capped at 150 words for English or 150 characters for Chinese; in the rare case two compression attempts still exceed the limit, it trims at whole-sentence boundaries.
 - Screenshot / vision recognition is not implemented.
 
 ## Local preview / development
