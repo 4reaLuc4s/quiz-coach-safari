@@ -14,6 +14,28 @@ A tiny floating card that answers multiple-choice questions on web pages. Built 
 
 > **定位**：自测、练习、核对答案的学习辅助工具。**请勿用于考试作弊**。本项目与任何考试平台无关。
 
+## 下载
+
+**方式一：发布包（推荐）**
+
+打开 [Releases](https://github.com/4reaLuc4s/quiz-coach-safari/releases/latest)，下载：
+
+- `quiz-coach-safari-1.2.0.zip`：完整包，包含扩展、用户脚本、工具和截图
+- `quiz-coach.user.js`：只要 iPhone / iPad 用户脚本的，直接下这个
+
+**方式二：Code → Download ZIP**
+
+仓库页右上角绿色 **Code** 按钮 → **Download ZIP**，解压后使用。
+
+**方式三：git clone**
+
+```bash
+git clone https://github.com/4reaLuc4s/quiz-coach-safari.git
+```
+
+> 只用 iPhone / iPad 的话，不需要整个仓库，下载 `quiz-coach.user.js` 就够了。
+> 仓库和发布包都**不含 API Key**；第一次使用在卡片设置里填。
+
 ## 为什么是 iPad / iPhone 优先
 
 - **Safari 直接装**：用免费的 **Userscripts** 扩展，不需要 Mac、不需要 Apple 开发者账号，也没有 7 天签名过期。
@@ -49,7 +71,7 @@ A tiny floating card that answers multiple-choice questions on web pages. Built 
 
 原理：Safari 的「内容脚本」和「用户脚本」是同一件事。用 App Store 里免费的 **Userscripts** 扩展，就能在没有开发者签名的情况下把脚本跑在 iOS / iPadOS 的 Safari 里。零签名、零 7 天过期。
 
-1. 用记事本打开 `userscript/quiz-coach.user.js`，最上面的 `apiKey` 可以现在填；留空也行，之后在卡片设置里按网站填。
+1. 从上方「下载」拿到 `quiz-coach.user.js`（Release 单文件，或解压 zip 后取 `userscript/quiz-coach.user.js`），用记事本打开，最上面的 `apiKey` 可以现在填；留空也行，之后在卡片设置里按网站填。
 2. 把文件传到 iPhone / iPad（微信文件传输助手 / iCloud / 邮件都可以），存到「文件」。
 3. App Store 搜 **Userscripts**（作者 quoid，免费开源），打开后选一个文件夹作为「脚本目录」。
 4. 回到「文件」，把 `quiz-coach.user.js` 移进那个目录；再打开 Userscripts，确认开关是开的。
@@ -62,7 +84,7 @@ A tiny floating card that answers multiple-choice questions on web pages. Built 
 ### 路线 B：Chrome / Edge（最快）
 
 1. 打开 `chrome://extensions`（Edge 是 `edge://extensions`），右上角开「开发者模式」。
-2. 「加载已解压的扩展程序」→ 选 `Extension/Resources`。
+2. 「加载已解压的扩展程序」→ 选解压后 `Extension/Resources` 目录。
 3. 工具栏点 Quiz Coach 图标 → 填 API 地址 / Key / 模型 → 保存。
 4. 任何网页右上角出现小灰点即可用。
 

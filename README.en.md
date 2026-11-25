@@ -12,6 +12,28 @@
 
 > **Purpose**: a study aid for self-testing, practice and checking answers. **Do not use it for exam cheating.** This project is not affiliated with any exam platform.
 
+## Download
+
+**Option 1: Release package (recommended)**
+
+Open [Releases](https://github.com/4reaLuc4s/quiz-coach-safari/releases/latest) and download:
+
+- `quiz-coach-safari-1.2.0.zip` — full package with the extension, userscript, tools and screenshots
+- `quiz-coach.user.js` — standalone userscript for iPhone / iPad
+
+**Option 2: Code → Download ZIP**
+
+Click the green **Code** button on the repository page → **Download ZIP**, then extract it.
+
+**Option 3: git clone**
+
+```bash
+git clone https://github.com/4reaLuc4s/quiz-coach-safari.git
+```
+
+> If you only need iPhone / iPad, you do not need the whole repo — just download `quiz-coach.user.js`.
+> Neither the repo nor the release contains API keys; add your key in the card settings on first use.
+
 ## Why iPad-first?
 
 - **Install directly in Safari**: with the free **Userscripts** app you need no Mac, no Apple developer account and no 7-day signing expiry.
@@ -45,7 +67,7 @@
 
 Safari content scripts and userscripts are the same thing. With the free **Userscripts** app you can run the script in Safari on iOS / iPadOS without an Apple developer signature.
 
-1. Open `userscript/quiz-coach.user.js` in a text editor and fill in `apiKey` at the top (you can also leave it empty and set it later in the card).
+1. Get `quiz-coach.user.js` from the Download section above (release asset, or `userscript/quiz-coach.user.js` inside the zip), open it in a text editor and fill in `apiKey` at the top (you can also leave it empty and set it later in the card).
 2. Transfer the file to your iPhone / iPad (Files app, iCloud, email, etc.).
 3. Install **Userscripts** from the App Store (by quoid, free and open source) and choose a folder as the script directory.
 4. Move `quiz-coach.user.js` into that folder and make sure the script is enabled in Userscripts.
@@ -58,7 +80,7 @@ Safari content scripts and userscripts are the same thing. With the free **Users
 ### Route B: Chrome / Edge (fastest)
 
 1. Open `chrome://extensions` (Edge: `edge://extensions`) and enable Developer mode.
-2. Click "Load unpacked" and select `Extension/Resources`.
+2. Click "Load unpacked" and select the extracted `Extension/Resources` folder.
 3. Click the Quiz Coach toolbar icon, fill in API endpoint / key / model, and save.
 4. The dot appears on any page.
 
