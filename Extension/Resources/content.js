@@ -19,7 +19,7 @@
   const HAS_EXT = !!(EXT && EXT.runtime && EXT.runtime.id);
   const IS_TOP = (() => { try { return window.top === window.self; } catch (e) { return false; } })();
   const HOST = location.hostname || 'local';
-  const VERSION = '1.3.0';
+  const VERSION = '1.3.1';
 
   /* --------------------------------------------------------------- 常量 */
   const BOOT_CFG = (() => {
@@ -981,25 +981,25 @@
   }
   .wrap.dark .hd { border-bottom-color: rgba(255,255,255,.08); }
   .wrap.dark .hd .t, .wrap.dark .hd .t small { color: #a8a8a8; }
-  .wrap.dark .ico { background: #2a2a2c; border-color: rgba(255,255,255,.12); color: #cfcfcf; }
-  .wrap.dark .ico:active { background: #3a3a3c; }
+  .wrap.dark .ico { background: transparent; border-color: rgba(255,255,255,.18); color: #d0d0d0; }
+  .wrap.dark .ico:active { background: rgba(255,255,255,.08); }
   .wrap.dark .qtext, .wrap.dark .opt .x, .wrap.dark .ansx,
   .wrap.dark .big, .wrap.dark .en, .wrap.dark .zh { color: #d0d0d0; }
-  .wrap.dark .opt { background: #262628; border-color: rgba(255,255,255,.08); }
-  .wrap.dark .opt:active { background: #303032; }
-  .wrap.dark .opt .k { background: #333335; color: #b8b8b8; }
-  .wrap.dark .tag { background: #333335; color: #b8b8b8; }
-  .wrap.dark .explain { background: rgba(255,255,255,.06); color: #c8c8c8; }
-  .wrap.dark .bar { border-top-color: rgba(255,255,255,.08); }
-  .wrap.dark .btn { background: #2a2a2c; border-color: rgba(255,255,255,.12); color: #d0d0d0; }
-  .wrap.dark .btn:active { background: #3a3a3c; }
-  .wrap.dark .btn.pri { border-color: rgba(255,255,255,.25); color: #f0f0f0; }
+  .wrap.dark .opt { background: transparent; border-color: rgba(255,255,255,.14); }
+  .wrap.dark .opt:active { background: rgba(255,255,255,.06); }
+  .wrap.dark .opt .k { background: transparent; border: 1px solid rgba(255,255,255,.16); color: #c8c8c8; }
+  .wrap.dark .tag { background: transparent; border: 1px solid rgba(255,255,255,.16); color: #c8c8c8; }
+  .wrap.dark .explain { background: transparent; border: 1px solid rgba(255,255,255,.12); color: #c8c8c8; }
+  .wrap.dark .bar { border-top-color: rgba(255,255,255,.1); }
+  .wrap.dark .btn { background: transparent; border-color: rgba(255,255,255,.18); color: #d0d0d0; }
+  .wrap.dark .btn:active { background: rgba(255,255,255,.08); }
+  .wrap.dark .btn.pri { border-color: rgba(255,255,255,.4); color: #f0f0f0; }
   .wrap.dark .note, .wrap.dark .tip, .wrap.dark .mini, .wrap.dark .err { color: #b0b0b0; }
-  .wrap.dark .calbar { background: #242426; color: #b8b8b8; border-bottom-color: rgba(255,255,255,.08); }
+  .wrap.dark .calbar { background: transparent; color: #b8b8b8; border-bottom-color: rgba(255,255,255,.1); }
   .wrap.dark .field label { color: #b5b5b5; }
   .wrap.dark .field input, .wrap.dark .field select,
   .wrap.dark #qc-paste, .wrap.dark #qc-essay {
-    background: #242426; border-color: rgba(255,255,255,.12); color: #e0e0e0;
+    background: transparent; border-color: rgba(255,255,255,.18); color: #e0e0e0;
   }
   .wrap.dark .field input:focus, .wrap.dark .field select:focus,
   .wrap.dark #qc-paste:focus, .wrap.dark #qc-essay:focus { border-color: rgba(255,255,255,.3); }
@@ -1056,7 +1056,7 @@
     shadow.innerHTML =
       '<style>' + CSS + '</style>' +
       '<div class="wrap' + (S.settings.theme === 'dark' ? ' dark' : '') + '" style="' + posStyle +
-      '--qc-alpha:' + Math.min(1, Math.max(0.3, Number(S.settings.opacity) || 0.74)) + ';">' +
+      '--qc-alpha:' + Math.min(1, Math.max(0.1, Number(S.settings.opacity) || 0.74)) + ';">' +
       header() + body() + footer() +
       '</div>';
     bind();
@@ -1084,7 +1084,7 @@
       const st = S.settings || {};
       const langPref = S.langPref || 'auto';
       const theme = st.theme === 'dark' ? 'dark' : 'light';
-      const alpha = Math.min(1, Math.max(0.3, Number(st.opacity) || 0.74));
+      const alpha = Math.min(1, Math.max(0.1, Number(st.opacity) || 0.74));
       const answerPref = st.answerLang || 'auto';
       return '<div class="bd">' +
         '<div class="field"><label>' + esc(t('language')) + '</label>' +
@@ -1108,7 +1108,7 @@
         '<div class="field"><label>' + esc(t('opacity')) +
         ' <span id="qc-opacity-val" style="float:right;font-weight:400">' +
         Math.round(alpha * 100) + '%</span></label>' +
-        '<input id="qc-opacity" type="range" min="30" max="100" step="1" value="' + Math.round(alpha * 100) + '"></div>' +
+        '<input id="qc-opacity" type="range" min="10" max="100" step="1" value="' + Math.round(alpha * 100) + '"></div>' +
         '<div class="field"><label>' + esc(t('apiBase')) + '</label>' +
         '<input id="qc-api-base" type="text" spellcheck="false" value="' + esc(st.apiBase || '') + '" placeholder="https://api.deepseek.com/v1/chat/completions"></div>' +
         '<div class="field"><label>' + esc(t('apiKey')) + '</label>' +
@@ -1464,7 +1464,7 @@
           answerLang: val('qc-answer-lang') || 'auto',
           theme: val('qc-theme') === 'dark' ? 'dark' : 'light',
           opacity: isFinite(rawOpacity) && rawOpacity > 0
-            ? Math.min(1, Math.max(0.3, rawOpacity / 100))
+            ? Math.min(1, Math.max(0.1, rawOpacity / 100))
             : 0.74
         });
         saveSettings(next);

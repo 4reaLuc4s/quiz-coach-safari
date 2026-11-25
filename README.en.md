@@ -18,7 +18,7 @@
 
 Open [Releases](https://github.com/4reaLuc4s/quiz-coach-safari/releases/latest) and download:
 
-- `quiz-coach-safari-1.3.0.zip` — full package with the extension, userscript, tools and screenshots
+- `quiz-coach-safari-1.3.1.zip` — full package with the extension, userscript, tools and screenshots
 - `quiz-coach.user.js` — standalone userscript for iPhone / iPad
 
 **Option 2: Code → Download ZIP**
@@ -116,8 +116,8 @@ Tap the **⚙** button at the top of the card (or long-press the title for 0.7 s
 
 - **Card language**: Auto / 中文 / English
 - **Answer language**: Auto / 中文 / English. Auto: C-mode explanations follow the UI language; A-mode essays default to English
-- **Theme**: White / Black
-- **Opacity**: 30%–100% (card background only)
+- **Theme**: White / Black. In Black theme, inputs, buttons and options use thin outlines only — no black fills
+- **Opacity**: 10%–100% (card background only)
 - **API endpoint / key / model**, plus per-site calibration
 
 ![Settings](docs/settings-en.jpg)

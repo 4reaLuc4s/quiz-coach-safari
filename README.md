@@ -20,7 +20,7 @@ A tiny floating card that answers multiple-choice questions on web pages. Built 
 
 打开 [Releases](https://github.com/4reaLuc4s/quiz-coach-safari/releases/latest)，下载：
 
-- `quiz-coach-safari-1.3.0.zip`：完整包，包含扩展、用户脚本、工具和截图
+- `quiz-coach-safari-1.3.1.zip`：完整包，包含扩展、用户脚本、工具和截图
 - `quiz-coach.user.js`：只要 iPhone / iPad 用户脚本的，直接下这个
 
 **方式二：Code → Download ZIP**
@@ -120,8 +120,8 @@ git clone https://github.com/4reaLuc4s/quiz-coach-safari.git
 
 - **卡片语言**：自动 / 中文 / English
 - **答案语言**：自动 / 中文 / English。自动时 C 模式解析跟随界面语言，A 模式论述题默认英文
-- **卡片主题**：白色 / 黑色
-- **透明度**：30%–100%（只影响卡片底色）
+- **卡片主题**：白色 / 黑色。黑色主题下输入框、按钮、选项都只用细边框分隔，不填充黑底
+- **透明度**：10%–100%（只影响卡片底色）
 - **API 地址 / Key / 模型**，以及按网站标定
 
 ![设置](docs/settings.jpg)
